@@ -97,7 +97,7 @@
 /processorParam:TextureFormat=Color
 /build:resUI/endButton.png
 
-#begin resUI/mainMenupng.png
+#begin resUI/mainMenu.png
 /importer:TextureImporter
 /processor:TextureProcessor
 /processorParam:ColorKeyColor=255,0,255,255
@@ -107,7 +107,19 @@
 /processorParam:ResizeToPowerOfTwo=False
 /processorParam:MakeSquare=False
 /processorParam:TextureFormat=Color
-/build:resUI/mainMenupng.png
+/build:resUI/mainMenu.png
+
+#begin resUI/mainMenuButton.png
+/importer:TextureImporter
+/processor:TextureProcessor
+/processorParam:ColorKeyColor=255,0,255,255
+/processorParam:ColorKeyEnabled=True
+/processorParam:GenerateMipmaps=False
+/processorParam:PremultiplyAlpha=True
+/processorParam:ResizeToPowerOfTwo=False
+/processorParam:MakeSquare=False
+/processorParam:TextureFormat=Color
+/build:resUI/mainMenuButton.png
 
 #begin resUI/startButton.png
 /importer:TextureImporter
