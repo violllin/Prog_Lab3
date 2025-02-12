@@ -1,14 +1,14 @@
 ﻿using Microsoft.Xna.Framework;
+using Microsoft.Xna.Framework.Content;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
 using MyFirstGame.World;
+using System;
 
 namespace MyFirstGame.UI
 {
-    public class GeneralUI : IGame
+    public class GeneralUI
     {
-        public Game _game;
-
         Texture2D mainMenuButtonTexture;
         Texture2D endButtonTexture;
         Texture2D startButtonTexture;
@@ -29,90 +29,86 @@ namespace MyFirstGame.UI
         private bool IsEndButtonPressed = false;
         private bool IsMainMenuButtonPressed = false;
 
-        private GraphicsDeviceManager _graphicUI;
-        private SpriteBatch _spriteBatchUI;
-        private GlobalWorld globalWorld;
-
-        public GeneralUI(Game game)
+        public ContentManager Content
         {
-            _game = game;
+            get { return content; }
+        }
+        ContentManager content;
+        public Level level
+        {
+            get { return _level; }
+        }
+        Level _level;
+
+        public GeneralUI(IServiceProvider serviceProvider)
+        {
+            content = new ContentManager(serviceProvider);
         }
         public void Initialize()
         {
-            globalWorld = new GlobalWorld(_game);
         }
         public void LoadContent()
         {
-            _spriteBatchUI = new SpriteBatch(_game.GraphicsDevice);
-
-            mainMenuButtonTexture = _game.Content.Load<Texture2D>("resUI/mainMenuButton");
-            endButtonTexture = _game.Content.Load<Texture2D>("resUI/endButton");
-            startButtonTexture = _game.Content.Load<Texture2D>("resUI/startButton");
-            mainMenuTexture = _game.Content.Load<Texture2D>("resUI/mainMenu");
+            mainMenuButtonTexture = Content.Load<Texture2D>("Content/resUI/mainMenuButton");
+            endButtonTexture = Content.Load<Texture2D>("Content/resUI/endButton");
+            startButtonTexture = Content.Load<Texture2D>("Content/resUI/startButton");
+            mainMenuTexture = Content.Load<Texture2D>("Content/resUI/mainMenu");
 
             mainMenuButtonRect = new Rectangle(200, 50, mainMenuButtonTexture.Width, mainMenuButtonTexture.Height);
             endMenuButtonRect = new Rectangle(200, 100, endButtonTexture.Width, endButtonTexture.Height);
             startMenuButtonRect = new Rectangle(200, 200, startButtonTexture.Width, startButtonTexture.Height);
             mainMenuRect = new Rectangle(300, 300, mainMenuTexture.Width, mainMenuTexture.Height);
 
-
-
         }
         public void Update(GameTime gameTime)
         {
-            if (GamePad.GetState(PlayerIndex.One).Buttons.Back == ButtonState.Pressed || Keyboard.GetState().IsKeyDown(Keys.Escape))
-            { _game.Exit(); }
-
             var mState = Mouse.GetState();
             var mousePosition = mState.Position;
 
-            if (mainMenuButtonRect.Contains(mousePosition))
+            if (startMenuButtonRect.Contains(mousePosition) &&
+                mState.LeftButton == ButtonState.Pressed &&
+                mState.LeftButton == ButtonState.Released)
             {
-                if (mState.LeftButton == ButtonState.Pressed)
-                {
-                    IsMainMenuButtonPressed = true;
-                }
-                else if (mState.LeftButton == ButtonState.Released && IsButtonPressed)
-                {
-                    IsMainMenuButtonPressed = false;
-                }
+                IsStartButtonPressed = true;
             }
-            if (endMenuButtonRect.Contains(mousePosition))
+            else
             {
-                if (mState.LeftButton == ButtonState.Pressed)
-                {
-                    IsEndButtonPressed = true;
-                }
-                else if (mState.LeftButton == ButtonState.Released && IsButtonPressed)
-                {
-                    IsEndButtonPressed = false;
-                }
+                IsStartButtonPressed = false;
             }
-            if (startMenuButtonRect.Contains(mousePosition))
+            if (endMenuButtonRect.Contains(mousePosition) &&
+                mState.LeftButton == ButtonState.Pressed &&
+                mState.LeftButton == ButtonState.Released)
             {
-                if (mState.LeftButton == ButtonState.Pressed)
-                {
-                    IsStartButtonPressed = true;
-                }
-                else if (mState.LeftButton == ButtonState.Released && IsButtonPressed)
-                {
-                    IsStartButtonPressed = false;
-                }
-            }
-        }
-        public void Draw(GameTime gameTime)
-        {
-            _game.GraphicsDevice.Clear(Color.White);
+                IsEndButtonPressed = true;
 
-            _spriteBatchUI.Begin();
-            _spriteBatchUI.Draw(mainMenuTexture, mainMenuButtonRect, Color.White);
-            _spriteBatchUI.Draw(startButtonTexture, startMenuButtonRect, Color.White);
-            _spriteBatchUI.Draw(endButtonTexture, endMenuButtonRect, Color.White);
+            }
+            else
+            {
+                IsEndButtonPressed = false;
+            }
             if (IsStartButtonPressed)
             {
-                globalWorld._game.Run();
+
             }
-            _spriteBatchUI.End();
+            //if()
+        }
+        public void Draw(GameTime gameTime, SpriteBatch spriteBatch)
+        {
+
+            spriteBatch.Begin();
+            spriteBatch.Draw(mainMenuTexture, mainMenuButtonRect, Color.White);
+            spriteBatch.Draw(startButtonTexture, startMenuButtonRect, Color.White);
+            spriteBatch.Draw(endButtonTexture, endMenuButtonRect, Color.White);
+            //if (IsStartButtonPressed)
+            //{
+            //    globalWorld.Draw(gameTime);
+            //}
+            //if (IsEndButtonPressed)
+            //{
+            //    _game.Exit();
+            //}
+
+            spriteBatch.End();
         }
     }
 }

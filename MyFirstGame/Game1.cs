@@ -12,8 +12,9 @@ namespace MyFirstGame
     {
         private GraphicsDeviceManager _graphics;
         private SpriteBatch _spriteBatch;
-        private GlobalWorld world;
+        private Level world;
         private GeneralUI UI;
+        private Vector2 levelSize;
         public Game1()
         {
             _graphics = new GraphicsDeviceManager(this);
@@ -24,9 +25,18 @@ namespace MyFirstGame
         protected override void Initialize()
         {
             // TODO: Add your initialization logic 
+            _graphics.SynchronizeWithVerticalRetrace = true;
+            
+            
+            world = new Level(Content.ServiceProvider);
+            world.Initialize();
 
-            world = new GlobalWorld(this);
-            UI = new GeneralUI(this);
+            UI = new GeneralUI(Content.ServiceProvider);
+
+            _graphics.PreferredBackBufferWidth = (int)world.GetLevelSize(32, 32).X;
+            _graphics.PreferredBackBufferHeight = (int)world.GetLevelSize(32, 32).Y;
+
+            _graphics.ApplyChanges();
             base.Initialize();
         }
 
@@ -34,6 +44,7 @@ namespace MyFirstGame
         {
             _spriteBatch = new SpriteBatch(GraphicsDevice);
             // TODO: use this.Content to load your game content here
+            world.LoadContent();
         }
 
         protected override void Update(GameTime gameTime)
@@ -42,36 +53,7 @@ namespace MyFirstGame
                 Exit();
 
             // TODO: Add your update logic here
-
-
-
-            //float updateBallSpeed = ballSpeed * (float)gameTime.ElapsedGameTime.TotalSeconds * 2;
-
-            // Keyboard
-            var kstate = Keyboard.GetState();
-            if (kstate.IsKeyDown(Keys.Down) || kstate.IsKeyDown(Keys.S))
-            {
-            }
-            if (kstate.IsKeyDown(Keys.Up) || kstate.IsKeyDown(Keys.W))
-            {
-            }
-            if (kstate.IsKeyDown(Keys.Left) || kstate.IsKeyDown(Keys.A))
-            {
-            }
-            if (kstate.IsKeyDown(Keys.Right) || kstate.IsKeyDown(Keys.D))
-            {
-            }
-            if (kstate.IsKeyDown(Keys.R))
-            {
-                
-            }
-
-            // Mouse
-            var mstate = Mouse.GetState();
-            if (mstate.LeftButton == ButtonState.Pressed)
-            {
-            }
-
+            world.Update(gameTime);
             base.Update(gameTime);
         }
 
@@ -79,16 +61,15 @@ namespace MyFirstGame
         {
             GraphicsDevice.Clear(Color.CornflowerBlue);
 
-            // World "Run()"
-            //world.Initialize();
-            //world.LoadContent();
-            //world.Update(gameTime);
-            //world.Draw(gameTime);
-
-            UI.Initialize();
-            UI.LoadContent();
-            UI.Update(gameTime);
-            UI.Draw(gameTime);
+            // World "Run
+            
+           
+            
+            world.Draw(gameTime, _spriteBatch);
+            //UI.Initialize();
+            //UI.LoadContent();
+            //UI.Update(gameTime);
+            //UI.Draw(gameTime, _spriteBatch);
             base.Draw(gameTime);
         }
     }
