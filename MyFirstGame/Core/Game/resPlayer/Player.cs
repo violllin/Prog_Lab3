@@ -91,8 +91,8 @@ namespace MyFirstGame.Core.Game.resPlayer
         {
             var newX = x; 
             var newY = y;
-            var mapWidth = levelA.Width * Tile_Size;
-            var mapHeight = levelA.Height * Tile_Size;
+            var mapWidth = (levelA.Width * Tile_Size) - playerBounds.Width;
+            var mapHeight = (levelA.Height * Tile_Size) - playerBounds.Height;
             return newX >= 0 && newY >= 0 && newX < mapWidth && newY < mapHeight;
         }
 
