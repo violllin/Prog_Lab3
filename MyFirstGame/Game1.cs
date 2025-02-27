@@ -1,10 +1,9 @@
 ﻿using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
-using MyFirstGame.UI;
-using MyFirstGame.World;
-using System;
-using System.Collections.Generic;
+using MyFirstGame.Core.Game.UI;
+using MyFirstGame.Core.Game.World;
+using System.IO;
 
 namespace MyFirstGame
 {
@@ -12,7 +11,6 @@ namespace MyFirstGame
     {
         private GraphicsDeviceManager _graphics;
         private SpriteBatch _spriteBatch;
-        private Level world;
         private GeneralUI UI;
         private Vector2 levelSize;
         public Game1()
@@ -21,22 +19,20 @@ namespace MyFirstGame
             Content.RootDirectory = "Content";
             IsMouseVisible = true;
         }
+        public LevelA LevelA
+        {
+            get { return levelA; }
+        }
+        LevelA levelA;
 
         protected override void Initialize()
         {
             // TODO: Add your initialization logic 
             _graphics.SynchronizeWithVerticalRetrace = true;
-            
-            
-            world = new Level(Content.ServiceProvider);
-            world.Initialize();
 
-            UI = new GeneralUI(Content.ServiceProvider);
+            levelA = new LevelA(Services);
+            levelA.Initialize();
 
-            _graphics.PreferredBackBufferWidth = (int)world.GetLevelSize(32, 32).X;
-            _graphics.PreferredBackBufferHeight = (int)world.GetLevelSize(32, 32).Y;
-
-            _graphics.ApplyChanges();
             base.Initialize();
         }
 
@@ -44,7 +40,14 @@ namespace MyFirstGame
         {
             _spriteBatch = new SpriteBatch(GraphicsDevice);
             // TODO: use this.Content to load your game content here
-            world.LoadContent();
+
+            levelA.LoadTileMap(Path.GetFullPath("C:\\Users\\fit43\\source\\repos\\MyFirstGame\\MyFirstGame\\Core\\Game\\Levels\\TileMap2.json"));
+            levelA.LoadTextureMap();
+            levelA.LoadEnemyTexture();
+
+            _graphics.PreferredBackBufferWidth = levelA.Width * 32;
+            _graphics.PreferredBackBufferHeight = levelA.Height * 32;
+            _graphics.ApplyChanges();
         }
 
         protected override void Update(GameTime gameTime)
@@ -52,8 +55,7 @@ namespace MyFirstGame
             if (GamePad.GetState(PlayerIndex.One).Buttons.Back == ButtonState.Pressed || Keyboard.GetState().IsKeyDown(Keys.Escape))
                 Exit();
 
-            // TODO: Add your update logic here
-            world.Update(gameTime);
+            levelA.Update(gameTime);
             base.Update(gameTime);
         }
 
@@ -61,15 +63,10 @@ namespace MyFirstGame
         {
             GraphicsDevice.Clear(Color.CornflowerBlue);
 
-            // World "Run
-            
-           
-            
-            world.Draw(gameTime, _spriteBatch);
-            //UI.Initialize();
-            //UI.LoadContent();
-            //UI.Update(gameTime);
-            //UI.Draw(gameTime, _spriteBatch);
+
+            levelA.Draw(_spriteBatch);
+
+
             base.Draw(gameTime);
         }
     }

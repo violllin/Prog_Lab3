@@ -2,10 +2,10 @@
 using Microsoft.Xna.Framework.Content;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
-using MyFirstGame.World;
+using MyFirstGame.Core.Game.World;
 using System;
 
-namespace MyFirstGame.UI
+namespace MyFirstGame.Core.Game.UI
 {
     public class GeneralUI
     {
@@ -34,12 +34,7 @@ namespace MyFirstGame.UI
             get { return content; }
         }
         ContentManager content;
-        public Level level
-        {
-            get { return _level; }
-        }
-        Level _level;
-
+       
         public GeneralUI(IServiceProvider serviceProvider)
         {
             content = new ContentManager(serviceProvider);

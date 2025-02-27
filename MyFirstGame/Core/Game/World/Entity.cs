@@ -5,7 +5,7 @@ using System.Numerics;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace MyFirstGame.World
+namespace MyFirstGame.Core.Game.World
 {
     public class Entity
     {

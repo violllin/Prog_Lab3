@@ -2,19 +2,19 @@
 using Microsoft.Xna.Framework.Content;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
-using MyFirstGame.World;
+using MyFirstGame.Core.Game.World;
 using System;
 
-namespace MyFirstGame.resPlayer
+namespace MyFirstGame.Core.Game.resPlayer
 {
     public class Player
     {
         Texture2D playerTexture;
-
-      
+        private Rectangle playerBounds;
 
         private const float speed = 2.0f;
-
+        private const int Tile_Size = 32;
+        private bool isMoving;
         public bool IsAlive
         {
             get { return isAlive; }
@@ -32,41 +32,47 @@ namespace MyFirstGame.resPlayer
         }
         ContentManager content;
 
-        public Level level
+        public LevelA levelA
         {
-            get { return _level; }
+            get { return _levelA; }
         }
-        Level _level;
-
+        LevelA _levelA;
         public Vector2 Position
         {
             get { return position; }
             set { position = value; }
         }
         Vector2 position;
-
-        
-        public Player(Level level, Vector2 position)
+        public Player(LevelA levelA, Vector2 position)
         {
-            this._level = level;
+            _levelA = levelA;
             LoadContent();
             Reset(position);
         }
-        // Сделано умножение на 32 для установки корректной начальной позиции в соотвествии 
-        // с размером текстуры (32х32)
         public void Reset(Vector2 position)
         {
-            Position = position * 32;
+            Position = position * Tile_Size;
             isAlive = true;
         }
-        void GetMove(float x, float y)
+        public Vector2 GetPosition()
         {
+            return position; 
+        }
+        private void GetMove(float x, float y)
+        {
+            Vector2 movement = new Vector2(x, y) * speed;
+            Vector2 newPosition = position + movement;
+
             Position += new Vector2(x, y) * speed;
+
+            
             Console.WriteLine($"{position.X} {position.Y}");
+
         }
         public void LoadContent()
         {
-            playerTexture = level.Content.Load<Texture2D>("resGW/playerV1");
+            
+            playerTexture = levelA.Content.Load<Texture2D>("resGW/playerV1");
         }
         public void Update(GameTime gameTime)
         {
@@ -79,11 +85,26 @@ namespace MyFirstGame.resPlayer
             if (kstate.IsKeyDown(Keys.S) || kstate.IsKeyDown(Keys.Down)) { y += 1; }
             if (kstate.IsKeyDown(Keys.A) || kstate.IsKeyDown(Keys.Left)) { x -= 1; }
             if (kstate.IsKeyDown(Keys.D) || kstate.IsKeyDown(Keys.Right)) { x += 1; }
-            GetMove(x,y);
+
+            GetMove(x, y);
+        }
+        private void UpdatePlayerBounds()
+        {
+            if (playerTexture != null)
+            {
+                playerBounds = new Rectangle((int)position.X, (int)position.Y, 
+                                             playerTexture.Width, playerTexture.Height);
+            }
+
         }
         public void Draw(SpriteBatch spriteBatch)
         {
-            spriteBatch.Draw(playerTexture, position,Color.White);
+            spriteBatch.Draw(playerTexture, position, Color.White);
         }
+
+
+
+
+        
     }
 }
