@@ -58,21 +58,11 @@ namespace MyFirstGame.Core.Game.resPlayer
         {
             return position; 
         }
-        private void GetMove(float x, float y)
-        {
-            Vector2 movement = new Vector2(x, y) * speed;
-            Vector2 newPosition = position + movement;
 
-            Position += new Vector2(x, y) * speed;
-
-            
-            Console.WriteLine($"{position.X} {position.Y}");
-
-        }
         public void LoadContent()
         {
-            
             playerTexture = levelA.Content.Load<Texture2D>("resGW/playerV1");
+            UpdatePlayerBounds();
         }
         public void Update(GameTime gameTime)
         {
@@ -85,7 +75,7 @@ namespace MyFirstGame.Core.Game.resPlayer
             if (kstate.IsKeyDown(Keys.S) || kstate.IsKeyDown(Keys.Down)) { y += 1; }
             if (kstate.IsKeyDown(Keys.A) || kstate.IsKeyDown(Keys.Left)) { x -= 1; }
             if (kstate.IsKeyDown(Keys.D) || kstate.IsKeyDown(Keys.Right)) { x += 1; }
-
+            
             GetMove(x, y);
         }
         private void UpdatePlayerBounds()
@@ -95,8 +85,26 @@ namespace MyFirstGame.Core.Game.resPlayer
                 playerBounds = new Rectangle((int)position.X, (int)position.Y, 
                                              playerTexture.Width, playerTexture.Height);
             }
-
         }
+
+        private bool CanWalkTo(float x, float y)
+        {
+            var newX = x; 
+            var newY = y;
+            var mapWidth = levelA.Width * Tile_Size;
+            var mapHeight = levelA.Height * Tile_Size;
+            return newX >= 0 && newY >= 0 && newX < mapWidth && newY < mapHeight;
+        }
+
+        private void GetMove(float x, float y)
+        {
+            Vector2 movement = new Vector2(x, y) * speed;
+            Vector2 newPosition = position + movement;    
+
+            if (CanWalkTo(newPosition.X, newPosition.Y))     
+                Position += movement;
+        }
+        
         public void Draw(SpriteBatch spriteBatch)
         {
             spriteBatch.Draw(playerTexture, position, Color.White);

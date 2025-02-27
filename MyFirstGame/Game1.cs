@@ -1,4 +1,5 @@
-﻿using Microsoft.Xna.Framework;
+﻿using System;
+using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
 using MyFirstGame.Core.Game.UI;
@@ -40,8 +41,10 @@ namespace MyFirstGame
         {
             _spriteBatch = new SpriteBatch(GraphicsDevice);
             // TODO: use this.Content to load your game content here
-
-            levelA.LoadTileMap(Path.GetFullPath("C:\\Users\\fit43\\source\\repos\\MyFirstGame\\MyFirstGame\\Core\\Game\\Levels\\TileMap2.json"));
+            var baseDir = AppDomain.CurrentDomain.BaseDirectory;
+            var relativePath = Path.Combine("Core", "Game", "Levels", "TileMap2.json"); 
+            var fullPath = Path.Combine(baseDir, relativePath);
+            levelA.LoadTileMap(Path.GetFullPath(fullPath));
             levelA.LoadTextureMap();
             levelA.LoadEnemyTexture();
 
