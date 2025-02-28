@@ -1,5 +1,5 @@
 ﻿using Feature;
-using Feature.ResourceManager;
+using Feature.LevelLoader;
 using Feature.TextureManager;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Content;
@@ -11,7 +11,6 @@ namespace Core.Game.Entity;
 public class Level
 {
     private readonly ITextureManager _textureManager = new TextureManager();
-    private readonly IResourceManager _resourceManager = new ResourceManager();
     private Dictionary<int, Texture2D> _texturesGw = [];
     private readonly ContentManager _contentManager;
     private Microsoft.Xna.Framework.Vector2 _position;
@@ -48,9 +47,9 @@ public class Level
 
     #region LoadRegion
     
-    public void LoadTileMap(string filePath)
+    public void LoadTileMap(ILevelLoader levelLoader)
     {
-        TileMap = _resourceManager.LoadTileMap(filePath);
+        TileMap = levelLoader.LoadRandomLevel();
     }
 
     public void LoadMapTextures()
