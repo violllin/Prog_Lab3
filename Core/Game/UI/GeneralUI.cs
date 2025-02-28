@@ -2,10 +2,8 @@
 using Microsoft.Xna.Framework.Content;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
-using MyFirstGame.Core.Game.World;
-using System;
 
-namespace MyFirstGame.Core.Game.UI
+namespace Core.Game.UI
 {
     public class GeneralUI
     {
