@@ -10,12 +10,18 @@ namespace MyFirstGame.Core.Game.resPlayer
     public class Player
     {
         Texture2D playerTexture;
-        Texture2D floorTexture;
         private Rectangle playerBounds;
 
         private const float speed = 2.0f;
         private const int Tile_Size = 32;
         private bool isMoving;
+
+        public bool IsAlive
+        {
+            get { return isAlive; }
+        }
+
+        bool isAlive;
 
         public Texture2D PlayerTexture
         {
@@ -42,22 +48,20 @@ namespace MyFirstGame.Core.Game.resPlayer
             get { return position; }
             set { position = value; }
         }
+
         Vector2 position;
-        public Vector2 StartPosition
-        {
-            get { return startPosition; }
-            set { startPosition = value; }
-        }
-        Vector2 startPosition;
+
         public Player(LevelA levelA, Vector2 position)
         {
             _levelA = levelA;
+            LoadContent();
             Reset(position);
         }
 
         public void Reset(Vector2 position)
         {
             Position = position * Tile_Size;
+            isAlive = true;
         }
 
         public Vector2 GetPosition()
@@ -68,7 +72,6 @@ namespace MyFirstGame.Core.Game.resPlayer
         public void LoadContent()
         {
             playerTexture = levelA.Content.Load<Texture2D>("resGW/playerV1");
-            floorTexture = levelA.Content.Load<Texture2D>("resGW/floorV");
             UpdatePlayerBounds();
         }
 
@@ -93,14 +96,15 @@ namespace MyFirstGame.Core.Game.resPlayer
             {
                 x -= 1;
             }
-           
+
             if (kstate.IsKeyDown(Keys.D) || kstate.IsKeyDown(Keys.Right))
             {
                 x += 1;
             }
-            
+
             GetMove(x, y);
         }
+
         private void UpdatePlayerBounds()
         {
             if (playerTexture != null)
@@ -112,10 +116,12 @@ namespace MyFirstGame.Core.Game.resPlayer
 
         private bool CheckCollision(Rectangle playerRect)
         {
-            int startX = Math.Max(0, playerRect.Left / Tile_Size);
-            int startY = Math.Max(0, playerRect.Top / Tile_Size);
-            int endX = Math.Min(levelA.Width - 1, playerRect.Right / Tile_Size);
-            int endY = Math.Min(levelA.Height - 1, playerRect.Bottom / Tile_Size);
+            int tileSize = 32;
+            
+            int startX = Math.Max(0, playerRect.Left / tileSize);
+            int startY = Math.Max(0, playerRect.Top / tileSize);
+            int endX = Math.Min(levelA.Width - 1, playerRect.Right / tileSize);
+            int endY = Math.Min(levelA.Height - 1, playerRect.Bottom / tileSize);
 
             for (int y = startY; y <= endY; y++)
             {
@@ -125,7 +131,7 @@ namespace MyFirstGame.Core.Game.resPlayer
 
                     if (!IsTileWalkable(tileKey))
                     {
-                        Rectangle tileRect = new Rectangle(x * Tile_Size, y * Tile_Size, Tile_Size, Tile_Size);
+                        Rectangle tileRect = new Rectangle(x * tileSize, y * tileSize, tileSize, tileSize);
 
                         if (playerRect.Intersects(tileRect))
                         {
@@ -174,17 +180,7 @@ namespace MyFirstGame.Core.Game.resPlayer
 
         public void Draw(SpriteBatch spriteBatch)
         {
-            spriteBatch.Draw(
-                playerTexture,
-                position, 
-                null, 
-                Color.White, 
-                0f,
-                Vector2.Zero,
-                1f,
-                SpriteEffects.None,
-                0.0f);
-            //spriteBatch.Draw(playerTexture, position, Color.White);
+            spriteBatch.Draw(playerTexture, position, Color.White);
         }
     }
 }

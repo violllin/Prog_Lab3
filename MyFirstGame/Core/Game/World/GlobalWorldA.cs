@@ -14,10 +14,7 @@ namespace MyFirstGame.Core.Game.World
         private Dictionary<int, Texture2D> texturesGW;
 
         Vector2 playerPosition;
-        Vector2 playerStartPosition;
         Vector2 position;
-
-        Texture2D floorTexture;
         public LevelA(IServiceProvider serviceProvider)
         {
             content = new ContentManager(serviceProvider, "Content");
@@ -40,7 +37,6 @@ namespace MyFirstGame.Core.Game.World
         {
             get { return uploader; }
         }
-
         TileMap tileMap;
         public TileMap TileMap
         {
@@ -54,7 +50,7 @@ namespace MyFirstGame.Core.Game.World
         {
             get { return tileMap.Height; }
         }
-        private Vector2 FindPlayerStartPosition(int playerIndex)
+        private Vector2 FindPlayerPosition(int playerIndex)
         {
             for (int y = 0; y < Height; y++)
             {
@@ -80,12 +76,14 @@ namespace MyFirstGame.Core.Game.World
             return new Vector2(tileMap.Width * textureX, tileMap.Height * textureX);
         }
         
+        #region Initialize Section
         public void Initialize()
         {
             uploader = new UploadTileMapFromJson();
             tileMap = new TileMap();
         }
-
+        #endregion
+        #region Load Sections
         /// <summary>
         /// The function parameter must 
         /// specify the full path to the tile map.
@@ -94,9 +92,8 @@ namespace MyFirstGame.Core.Game.World
         public void LoadTileMap(string filePath)
         {
             tileMap = Uploader.LoadFromFile(filePath);
-            player = new Player(this, FindPlayerStartPosition(1));
+            player = new Player(this, FindPlayerPosition(1));
         }
-
         /// <summary>
         /// In this dictionary -> key = texture assignment on the tile map 
         /// </summary>
@@ -108,7 +105,6 @@ namespace MyFirstGame.Core.Game.World
                 { 2, Content.Load<Texture2D>("resGW/floorV")},
                 { 3, Content.Load<Texture2D>("resGW/chestV1")}
             };
-            floorTexture = texturesGW[2];
         }
         public void LoadEnemyTexture()
         {
@@ -117,7 +113,6 @@ namespace MyFirstGame.Core.Game.World
         public void LoadPlayer()
         {
             Player.LoadContent();
-            Player.StartPosition = FindPlayerStartPosition(1);
         }
         public void Log()
         {
@@ -126,6 +121,7 @@ namespace MyFirstGame.Core.Game.World
                 Console.WriteLine($"Key: {pair.Key}, Texture: {pair.Value.Name}");
             }
         }
+        #endregion
         public void Update(GameTime gameTime)
         {
             player.Update(gameTime);
@@ -133,7 +129,6 @@ namespace MyFirstGame.Core.Game.World
         public void Draw(SpriteBatch spriteBatch)
         {
             spriteBatch.Begin(SpriteSortMode.BackToFront, BlendState.AlphaBlend);
-            playerStartPosition = FindPlayerStartPosition(1);
 
             if (tileMap.Width > 0 && tileMap.Height > 0)
             {
@@ -141,16 +136,11 @@ namespace MyFirstGame.Core.Game.World
                 {
                     for (int x = 0; x < tileMap.Width; x++)
                     {
-                        position = new Vector2(x * floorTexture.Width, y * floorTexture.Height);
-
-                        // 1. Сначала рисуем пол (глубина 0.9 - он ниже всех)
-                        spriteBatch.Draw(floorTexture, position, null, Color.White, 0f, Vector2.Zero, 1f, SpriteEffects.None, 0.9f);
-
-                        // 2. Затем проверяем и рисуем тайлы
                         int tileKey = tileMap.Tiles[y][x];
                         if (texturesGW.TryGetValue(tileKey, out Texture2D tileTexture))
                         {
-                            spriteBatch.Draw(tileTexture, position, null, Color.White, 0f, Vector2.Zero, 1f, SpriteEffects.None, 0.8f);
+                            position = new Vector2(x * tileTexture.Width, y * tileTexture.Height);
+                            spriteBatch.Draw(tileTexture, position, Color.White);
                         }
                     }
                 }
@@ -160,7 +150,6 @@ namespace MyFirstGame.Core.Game.World
                 throw new ArgumentException("tileMap doesn't have a correct size");
             }
             player.Draw(spriteBatch);
-
             spriteBatch.End();
         }
     }
