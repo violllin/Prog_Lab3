@@ -1,2 +1,4 @@
-﻿using var game = new MyFirstGame.Game1();
+﻿using Core;
+
+using var game = new App();
 game.Run();
