@@ -16,7 +16,7 @@ public class Level
     private Microsoft.Xna.Framework.Vector2 _position;
 
     public TileMap TileMap { get; set; }
-    
+
     public Vector2 FindPlayerPosition(int playerIndex)
     {
         for (var y = 0; y < TileMap.Height; y++)
@@ -36,9 +36,10 @@ public class Level
                 }
             }
         }
+
         return Vector2.Zero;
     }
-    
+
     public Level(IServiceProvider serviceProvider)
     {
         _contentManager = new ContentManager(serviceProvider, "Content");
@@ -46,7 +47,7 @@ public class Level
     }
 
     #region LoadRegion
-    
+
     public void LoadTileMap(ILevelLoader levelLoader)
     {
         TileMap = levelLoader.LoadRandomLevel();
@@ -63,25 +64,28 @@ public class Level
 
     public void LoadEnemyTexture()
     {
-        _texturesGw.Add(_textureManager.LoadEnemyTextures(_contentManager).Item1, _textureManager.LoadEnemyTextures(_contentManager).Item2);
+        _texturesGw.Add(_textureManager.LoadEnemyTextures(_contentManager).Item1,
+            _textureManager.LoadEnemyTextures(_contentManager).Item2);
     }
 
     #endregion
-    
+
     #region InitializeRegion
 
     private void Initialize()
     {
         InitLevel();
     }
+
     private void InitLevel()
     {
         TileMap = new TileMap();
     }
-    
+
     #endregion
 
     #region RenderRegion
+
     public void Draw(SpriteBatch spriteBatch)
     {
         if (TileMap.Width > 0 && TileMap.Height > 0)
@@ -90,12 +94,16 @@ public class Level
             {
                 for (var x = 0; x < TileMap.Width; x++)
                 {
+                    _texturesGw.TryGetValue(2, out var texture);
+                    if (texture != null)
+                        spriteBatch.Draw(texture, _position, null, Color.White, 0f, Vector2.Zero, 1f,
+                            SpriteEffects.None, 0.8f);
+                    
                     var tileKey = TileMap.Tiles[y][x];
-                    if (_texturesGw.TryGetValue(tileKey, out var tileTexture))
-                    {
-                        _position = new Microsoft.Xna.Framework.Vector2(x * tileTexture.Width, y * tileTexture.Height);
-                        spriteBatch.Draw(tileTexture, _position, Color.White);
-                    }
+                    if (tileKey == 1) tileKey = 2;
+                    if (!_texturesGw.TryGetValue(tileKey, out var tileTexture)) continue;
+                    _position = new Microsoft.Xna.Framework.Vector2(x * tileTexture.Width, y * tileTexture.Height);
+                    spriteBatch.Draw(tileTexture, _position, Color.White);
                 }
             }
         }
@@ -104,6 +112,6 @@ public class Level
             throw new ArgumentException("tileMap doesn't have a correct size");
         }
     }
-    
+
     #endregion
 }
