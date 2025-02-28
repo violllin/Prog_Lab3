@@ -85,7 +85,16 @@ namespace Core.Game.Entity
 
         public void Draw(SpriteBatch spriteBatch)
         {
-            spriteBatch.Draw(_playerTexture, Position, Color.White);
+            spriteBatch.Draw(
+                _playerTexture,
+                _position, 
+                null, 
+                Color.White, 
+                0f,
+                Vector2.Zero,
+                1f,
+                SpriteEffects.None,
+                0.0f);
         }
     }
 }
