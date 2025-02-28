@@ -14,6 +14,7 @@ namespace MyFirstGame
         private SpriteBatch _spriteBatch;
         private GeneralUI UI;
         private Vector2 levelSize;
+        private static readonly Random random = new Random();
         public Game1()
         {
             _graphics = new GraphicsDeviceManager(this);
@@ -36,17 +37,32 @@ namespace MyFirstGame
 
             base.Initialize();
         }
+        private string LoadRandomMap(string directoryPath, string baseName, string extension)
+        {
+            string[] files = Directory.GetFiles(directoryPath, $"{baseName}*.{extension}");
+     
+            if (files.Length == 0)
+                throw new FileNotFoundException($"В папке '{directoryPath}' нет карт формата {extension}!");
 
+            string randomFile = files[random.Next(files.Length)];
+
+            return Path.GetFileName(randomFile);
+        }
         protected override void LoadContent()
         {
             _spriteBatch = new SpriteBatch(GraphicsDevice);
             // TODO: use this.Content to load your game content here
+
+            
             var baseDir = AppDomain.CurrentDomain.BaseDirectory;
-            var relativePath = Path.Combine("Core", "Game", "Levels", "TileMap2.json"); 
-            var fullPath = Path.Combine(baseDir, relativePath);
+            var relativePath = Path.Combine("Core", "Game", "Levels");
+            var fullPath = Path.Combine(baseDir, relativePath, LoadRandomMap(relativePath,"TileMap", "json"));
+            levelA.LoadTileMap(Path.GetFullPath(fullPath));
+
             levelA.LoadTileMap(Path.GetFullPath(fullPath));
             levelA.LoadTextureMap();
             levelA.LoadEnemyTexture();
+            levelA.LoadPlayer();
 
             _graphics.PreferredBackBufferWidth = levelA.Width * 32;
             _graphics.PreferredBackBufferHeight = levelA.Height * 32;

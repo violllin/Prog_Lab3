@@ -75,7 +75,6 @@ namespace MyFirstGame.Core.Game.UI
                 mState.LeftButton == ButtonState.Released)
             {
                 IsEndButtonPressed = true;
-
             }
             else
             {
