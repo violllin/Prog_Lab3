@@ -3,10 +3,13 @@ using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
 using Core.Game.Entity;
 using Feature;
+using Feature.LevelLoader;
+
 namespace Core;
 
 public class App : Microsoft.Xna.Framework.Game
 {
+    private readonly ILevelLoader _levelLoader = new LevelLoader();
     private GraphicsDeviceManager _graphics;
     private SpriteBatch _spriteBatch;
     private Player _player;
@@ -42,22 +45,10 @@ public class App : Microsoft.Xna.Framework.Game
 
     private void LoadLevel()
     {
-        _level.LoadTileMap(Path.GetFullPath(GetPathToLevel("TileMap2")));
+        _level.LoadTileMap(_levelLoader);
         _level.LoadMapTextures();
         _level.LoadEnemyTexture();
         _player = new Player(_level.FindPlayerPosition(1), Services, _level);
-    }
-
-    private string GetPathToLevel(string levelName)
-    {
-        var baseDir = AppDomain.CurrentDomain.BaseDirectory;
-        var projectRoot = Directory.GetParent(baseDir)?.Parent?.Parent;
-        if (projectRoot == null)
-        {
-            throw new DirectoryNotFoundException("Не удалось найти корневую директорию проекта.");
-        }
-        var relativePath = Path.Combine("..", "..", "Levels", "Levels", $"{levelName}.json");
-        return Path.GetFullPath(Path.Combine(projectRoot.FullName, relativePath));
     }
 
     protected override void Update(GameTime gameTime)
