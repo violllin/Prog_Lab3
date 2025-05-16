@@ -58,15 +58,16 @@ public class Level
         {
             _texturesGw.Add(texture.Key, texture.Value);
         }
+
         Console.WriteLine("Map textures loaded.");
     }
 
     public void LoadEnemyTextures()
     {
-        _texturesGw.Add(_textureManager.LoadEnemyTextures(_contentManager).Item1,
-            _textureManager.LoadEnemyTextures(_contentManager).Item2);
+        //TexturesGw.Add(_textureManager.LoadEnemyTextures(_contentManager).Item1,
+        //    _textureManager.LoadEnemyTextures(_contentManager).Item2);
     }
-    
+
     public void LoadEnemies(GameServiceContainer services)
     {
         for (var y = 0; y < TileMap.Height; y++)
@@ -76,8 +77,8 @@ public class Level
                 if (TileMap.Tiles[y][x] == (int)TileCollision.Enemy)
                 {
                     var position = new Vector2(x, y) * GameDefaults.TileSize;
-                    Console.WriteLine($"PRE: Enemy position initialized to: {position}");
-                    Enemies.Add(new Enemy(position, GameDefaults.EyeEnemyHealthPoints, GameDefaults.EyeEnemyAttackStrength, services));
+                    Enemies.Add(new Enemy(position, GameDefaults.EyeEnemyHealthPoints,
+                        GameDefaults.EyeEnemyAttackStrength, services));
                 }
             }
         }
@@ -109,16 +110,27 @@ public class Level
             {
                 for (var x = 0; x < TileMap.Width; x++)
                 {
-                    _texturesGw.TryGetValue(2, out var texture);
-                    if (texture != null)
-                        spriteBatch.Draw(texture, _position, null, Color.White, 0f, Vector2.Zero, 1f,
-                            SpriteEffects.None, 0.8f);
-                    
                     var tileKey = TileMap.Tiles[y][x];
-                    if (tileKey == 1) tileKey = 2;
-                    if (!_texturesGw.TryGetValue(tileKey, out var tileTexture)) continue;
-                    _position = new Microsoft.Xna.Framework.Vector2(x * tileTexture.Width, y * tileTexture.Height);
-                    spriteBatch.Draw(tileTexture, _position, Color.White);
+                    if (tileKey is 1 or 3) tileKey = 2;
+
+                    if (!_texturesGw.TryGetValue(tileKey, out var texture))
+                    {
+                        Console.WriteLine($"Текстура для ключа {tileKey} не найдена.");
+                        continue;
+                    }
+                    _position = new Microsoft.Xna.Framework.Vector2(x * GameDefaults.TileSize, y * GameDefaults.TileSize);
+
+                    // if (texture != null)
+                    //     spriteBatch.Draw(texture, _position, null, Color.White, 0f, Vector2.Zero, 1f,
+                    //         SpriteEffects.None, 0.8f);
+
+                    spriteBatch.Draw(texture, _position, null, Color.White, 0f, Vector2.Zero, 1f,
+                        SpriteEffects.None, 0.8f);
+                    //
+                    // if (!_texturesGw.TryGetValue(tileKey, out var tileTexture)) continue;
+                    // _position = new Microsoft.Xna.Framework.Vector2(x * tileTexture.Width, y * tileTexture.Height);
+                    // spriteBatch.Draw(tileTexture, _position, null, Color.White, 0f, Vector2.Zero, 1f,
+                    //     SpriteEffects.None, 0.8f);
                 }
             }
         }
@@ -127,12 +139,12 @@ public class Level
             throw new ArgumentException("tileMap doesn't have a correct size");
         }
     }
-    
+
     public void DrawEnemies(SpriteBatch spriteBatch)
     {
         foreach (var enemy in Enemies)
         {
-           enemy.Draw(spriteBatch);
+            enemy.Draw(spriteBatch);
         }
     }
 
