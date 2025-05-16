@@ -60,7 +60,6 @@ namespace Core.Game.Model
             var (x, y) = _movementManager.HandleMovement();
             if (IsAlive)
                 MovePlayer(x, y);
-            Console.WriteLine(_isAttacking);
             if (gameTime.TotalGameTime - _isDamaged.Item2 > _damagedRenderCooldown)
             {
                 _isDamaged = (false, _isDamaged.Item2);
