@@ -40,6 +40,19 @@ namespace Core.Game.Model
             LoadPlayerTextures();
             Reset(position * GameDefaults.TileSize, healthPoints);
         }
+        
+        public void Update(GameTime gameTime)
+        {
+            var (x, y) = _movementManager.HandleMovement();
+            if (IsAlive)
+                MovePlayer(x, y);
+            if (gameTime.TotalGameTime - _isDamaged.Item2 > _damagedRenderCooldown)
+            {
+                _isDamaged = (false, _isDamaged.Item2);
+            }
+        }
+
+        #region Reset/Setup
 
         private void Reset(Vector2 position, double healthPoints)
         {
@@ -58,24 +71,21 @@ namespace Core.Game.Model
             _level = newLevel;
         }
 
+        #endregion
+        
+        #region Load
+
         private void LoadPlayerTextures()
         {
             _playerTextures = _textureManager.LoadPlayerTextures(_contentManager) ??
                               throw new ContentLoadException("Не удалось загрузить текстуру игрока");
         }
 
-        public void Update(GameTime gameTime)
-        {
-            var (x, y) = _movementManager.HandleMovement();
-            if (IsAlive)
-                MovePlayer(x, y);
-            if (gameTime.TotalGameTime - _isDamaged.Item2 > _damagedRenderCooldown)
-            {
-                _isDamaged = (false, _isDamaged.Item2);
-            }
-        }
+        #endregion
         
-        private void CheckKeyCollision(Action<Key> onKeyPickUp, List<Key> keys)
+        #region Collision
+
+         private void CheckKeyCollision(Action<Key> onKeyPickUp, List<Key> keys)
         {
             var playerRect = new Rectangle(
                 (int)_position.X,
@@ -192,6 +202,47 @@ namespace Core.Game.Model
             return false;
         }
 
+        #endregion
+        
+        #region Damage
+
+        private bool IsInAttackRange(Vector2 targetPosition)
+        {
+            return Vector2.Distance(Position, targetPosition) <= GameDefaults.PlayerAttackRange;
+        }
+
+        public void TakeDamage(double damage, GameTime gameTime)
+        {
+            HealthPoints -= damage;
+            _isDamaged = (true, gameTime.TotalGameTime);
+            Console.WriteLine(
+                $"Получен урон: {damage}ед., состояние здоровья: ({HealthPoints}/{GameDefaults.PlayerHeathPoints})");
+        }
+
+        public void Hit(IAttacked target, GameTime gameTime)
+        {
+            if (target is Enemy enemy)
+            {
+                if (IsInAttackRange(enemy.Position))
+                {
+                    _lastAttackingTime =
+                        DelayedAttack.DelayedHit(target, gameTime, _lastAttackingTime, _attackCooldown,
+                            _attackStrength) ??
+                        _lastAttackingTime;
+                    _isAttacking = true;
+                }
+            }
+        }
+
+        public void SetAttacking(bool isAttacking)
+        {
+            _isAttacking = isAttacking;
+        }
+
+        #endregion
+
+        #region Render
+
         public void Draw(SpriteBatch spriteBatch)
         {
             if (_playerTextures.Count == 0)
@@ -239,37 +290,7 @@ namespace Core.Game.Model
             }
         }
 
-        private bool IsInAttackRange(Vector2 targetPosition)
-        {
-            return Vector2.Distance(Position, targetPosition) <= GameDefaults.PlayerAttackRange;
-        }
-
-        public void TakeDamage(double damage, GameTime gameTime)
-        {
-            HealthPoints -= damage;
-            _isDamaged = (true, gameTime.TotalGameTime);
-            Console.WriteLine(
-                $"Получен урон: {damage}ед., состояние здоровья: ({HealthPoints}/{GameDefaults.PlayerHeathPoints})");
-        }
-
-        public void Hit(IAttacked target, GameTime gameTime)
-        {
-            if (target is Enemy enemy)
-            {
-                if (IsInAttackRange(enemy.Position))
-                {
-                    _lastAttackingTime =
-                        DelayedAttack.DelayedHit(target, gameTime, _lastAttackingTime, _attackCooldown,
-                            _attackStrength) ??
-                        _lastAttackingTime;
-                    _isAttacking = true;
-                }
-            }
-        }
-
-        public void SetAttacking(bool isAttacking)
-        {
-            _isAttacking = isAttacking;
-        }
+        #endregion
+        
     }
 }

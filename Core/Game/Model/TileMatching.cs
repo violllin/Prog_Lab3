@@ -1,6 +1,6 @@
 ﻿namespace Core.Game.Model;
 
-public enum TileCollision
+public enum TileMatching
 {
     Wall = 0,
     SpawnPoint = 1,
