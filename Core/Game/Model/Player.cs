@@ -46,7 +46,6 @@ namespace Core.Game.Model
             Position = position;
             _position = Position;
             HealthPoints = healthPoints;
-            Console.WriteLine($"Player position initialized to: {_position}");
         }
         
         public void ResetPositionToSpawn(Vector2 spawnPosition)
@@ -102,6 +101,35 @@ namespace Core.Game.Model
                 }
             }
         }
+        
+        private void CheckHearthCollision(Action<Hearth> onHearthPickUp, List<Hearth> hearths)
+        {
+            var playerRect = new Rectangle(
+                (int)_position.X,
+                (int)_position.Y,
+                _playerTextures.First().Value.Width,
+                _playerTextures.First().Value.Height
+            );
+
+            foreach (var hearth in hearths)
+            {
+                if (hearth.IsPickedUp) continue;
+
+                var keyRect = new Rectangle(
+                    (int)hearth.Position.X,
+                    (int)hearth.Position.Y,
+                    GameDefaults.TileSize,
+                    GameDefaults.TileSize
+                );
+
+                if (playerRect.Intersects(keyRect))
+                {
+                    onHearthPickUp(hearth);
+                    HealthPoints += GameDefaults.HearthHealthPoints;
+                    Console.WriteLine($"Вы подобрали сердечко. Здоровье увеличено на {GameDefaults.HearthHealthPoints}. Состояние здоровья: ({HealthPoints}/{GameDefaults.PlayerHeathPoints})");
+                }
+            }
+        }
 
         private void MovePlayer(float x, float y)
         {
@@ -117,6 +145,7 @@ namespace Core.Game.Model
             );
 
             CheckKeyCollision(_level.PickUpKey, _level.Keys);
+            CheckHearthCollision(_level.PickUpHearth, _level.Hearths);
             
             if (!_movementManager.CheckCollision(horizontalRect, _level.TileMap) &&
                 !WillCollideWithEnemy(horizontalRect, _level.Enemies))

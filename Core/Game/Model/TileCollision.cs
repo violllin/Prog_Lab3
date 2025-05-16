@@ -8,5 +8,5 @@ public enum TileCollision
     Enemy = 3,
     Object = 4,
     Key = 11,
-    NextLevel = 12
+    Hearth = 12
 }

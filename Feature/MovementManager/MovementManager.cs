@@ -50,6 +50,11 @@ public class MovementManager : IMovementManager
         return tileKey == 3;
     }
     
+    private bool IsTileHeart(int tileKey)
+    {
+        return tileKey == 12;
+    }
+    
     public bool CheckCollision(Rectangle playerRect, TileMap tileMap)
     {
         var tileSize = GameDefaults.TileSize;
@@ -67,6 +72,7 @@ public class MovementManager : IMovementManager
                 if (IsTileKey(tileKey)) continue;
                 if (IsTileObstacle(tileKey)) continue;
                 if (IsTileEnemy(tileKey)) continue;
+                if (IsTileHeart(tileKey)) continue;
                 var tileRect = new Rectangle(x * tileSize, y * tileSize, tileSize, tileSize);
                 if (playerRect.Intersects(tileRect))
                 {

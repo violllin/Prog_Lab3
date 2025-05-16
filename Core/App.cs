@@ -44,31 +44,36 @@ public class App : Microsoft.Xna.Framework.Game
         _graphics.ApplyChanges();
     }
 
-    private void LoadLevel()
+    private void LoadLevel(bool isNewLevel = false)
     {
+        if (isNewLevel)
+        {
+            _level = new Level(Services);
+        }
         _level.LoadTileMap(_levelLoader);
         _level.LoadMapTextures();
+        
         _level.LoadEnemies(Services);
         _level.LoadKeys(Services);
-        _player = new Player(_level.FindPlayerPosition(1), GameDefaults.PlayerHeathPoints,
-            GameDefaults.PlayerAttackStrength, Services, _level);
-    }
-    
-    private void LoadNextLevel()
-    {
-        Console.WriteLine("Загрузка следующего уровня...");
-        _level = new Level(Services);
-        _level.LoadTileMap(_levelLoader);
-        _level.LoadMapTextures();
-        _level.LoadEnemies(Services);
-        _level.LoadKeys(Services);
+        _level.LoadHearths(Services);
+
+        if (!isNewLevel)
+        {
+            _player = new Player(_level.FindPlayerPosition(1), GameDefaults.PlayerHeathPoints,
+                GameDefaults.PlayerAttackStrength, Services, _level);
+        }
+        
         _player.ResetPositionToSpawn(_level.LevelSpawnPoint);
         _player.UpdateLevelReference(_level);
         SetupBufferSize();
         _gameOver = false;
         Console.WriteLine("Уровень загружен");
     }
-
+    
+    private void LoadNextLevel()
+    {
+        LoadLevel(true);
+    }
 
     protected override void Update(GameTime gameTime)
     {
@@ -92,8 +97,14 @@ public class App : Microsoft.Xna.Framework.Game
             Exit();
 
         _player.Update(gameTime);
-        _level.Enemies.ForEach(enemy => enemy.Update(gameTime));
-        
+        _level.Enemies.ForEach(enemy =>
+        {
+            if (enemy.IsAlive)
+            {
+                enemy.Update(gameTime);
+                enemy.SubscribeToEnemyDefeat(_level.OnEnemyDefeat);
+            }
+        });
         
         
         if (Mouse.GetState().LeftButton == ButtonState.Pressed)
@@ -132,8 +143,11 @@ public class App : Microsoft.Xna.Framework.Game
         _spriteBatch.Begin(SpriteSortMode.BackToFront, BlendState.AlphaBlend);
 
         _level.Draw(_spriteBatch);
+        
         _level.DrawEnemies(_spriteBatch);
         _level.DrawKeys(_spriteBatch);
+        _level.DrawHearths(_spriteBatch);
+        
         _player.Draw(_spriteBatch);
 
         _spriteBatch.End();

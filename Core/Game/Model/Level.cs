@@ -19,8 +19,10 @@ public class Level
 
     public List<Enemy> Enemies { get; private set; } = new List<Enemy>();
     public List<Key> Keys { get; private set; } = new List<Key>();
+    public List<Hearth> Hearths { get; private set; } = new List<Hearth>();
     public int PickedKeys { get; set; }
-    public bool IsCompleted => PickedKeys == Keys.Count;
+    public int EnemiesDefeated { get; set; }
+    public bool IsCompleted => PickedKeys == Keys.Count && EnemiesDefeated == Enemies.Count;
 
     public TileMap TileMap { get; set; }
 
@@ -33,13 +35,10 @@ public class Level
             {
                 if (row[x] == playerIndex)
                 {
-                    Console.WriteLine($"Player spawn position found at: ({x}, {y})");
                     return new Vector2(x, y);
                 }
             }
         }
-
-        Console.WriteLine("Player spawn position not found. Defaulting to (0, 0).");
         return Vector2.Zero;
     }
 
@@ -64,8 +63,6 @@ public class Level
         {
             _texturesGw.Add(texture.Key, texture.Value);
         }
-
-        Console.WriteLine("Map textures loaded.");
     }
 
     private Vector2 LoadSpawnPoint()
@@ -113,6 +110,21 @@ public class Level
             }
         }
     }
+    
+    public void LoadHearths(GameServiceContainer services)
+    {
+        for (var y = 0; y < TileMap.Height; y++)
+        {
+            for (var x = 0; x < TileMap.Width; x++)
+            {
+                if (TileMap.Tiles[y][x] == (int)TileCollision.Hearth)
+                {
+                    var position = new Vector2(x, y) * GameDefaults.TileSize;
+                    Hearths.Add(new Hearth(position, services));
+                }
+            }
+        }
+    }
 
     #endregion
 
@@ -136,7 +148,7 @@ public class Level
                 for (var x = 0; x < TileMap.Width; x++)
                 {
                     var tileKey = TileMap.Tiles[y][x];
-                    if (tileKey is 1 or 3 or 11) tileKey = 2;
+                    if (tileKey is 1 or 3 or 11 or 12) tileKey = 2;
 
                     if (!_texturesGw.TryGetValue(tileKey, out var texture))
                     {
@@ -155,11 +167,22 @@ public class Level
             throw new ArgumentException("tileMap doesn't have a correct size");
         }
     }
+    
+    public void OnEnemyDefeat()
+    {
+        EnemiesDefeated++;
+        Console.WriteLine($"{EnemiesDefeated}/{Enemies.Count} enemies defeated."); 
+    }
 
     public void PickUpKey(Key key)
     {
         key.PickUp();
         PickedKeys++;
+    }
+    
+    public void PickUpHearth(Hearth hearth)
+    {
+        hearth.PickUp();
     }
 
     public void DrawEnemies(SpriteBatch spriteBatch)
@@ -175,6 +198,14 @@ public class Level
         foreach (var key in Keys)
         {
             key.Draw(spriteBatch);
+        }
+    }
+    
+    public void DrawHearths(SpriteBatch spriteBatch)
+    {
+        foreach (var hearth in Hearths)
+        {
+            hearth.Draw(spriteBatch);
         }
     }
 
