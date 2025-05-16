@@ -38,15 +38,25 @@ namespace Core.Game.Model
             _attackCooldown = new TimeSpan(0, 0, 0, 1);
             _damagedRenderCooldown = new TimeSpan(0, 0, 0,0, 250);
             LoadPlayerTextures();
-            Reset(position, healthPoints);
+            Reset(position * GameDefaults.TileSize, healthPoints);
         }
 
         private void Reset(Vector2 position, double healthPoints)
         {
-            Position = position * GameDefaults.TileSize;
+            Position = position;
             _position = Position;
             HealthPoints = healthPoints;
             Console.WriteLine($"Player position initialized to: {_position}");
+        }
+        
+        public void ResetPositionToSpawn(Vector2 spawnPosition)
+        {
+            Reset(spawnPosition * GameDefaults.TileSize, HealthPoints);
+        }
+        
+        public void UpdateLevelReference(Level newLevel)
+        {
+            _level = newLevel;
         }
 
         private void LoadPlayerTextures()
@@ -64,6 +74,38 @@ namespace Core.Game.Model
             {
                 _isDamaged = (false, _isDamaged.Item2);
             }
+        }
+        
+        public void CheckKeyCollision(Action<Key> onKeyPickUp, List<Key> keys)
+        {
+            var playerRect = new Rectangle(
+                (int)_position.X,
+                (int)_position.Y,
+                _playerTextures.First().Value.Width,
+                _playerTextures.First().Value.Height
+            );
+
+            foreach (var key in keys)
+            {
+                if (key.IsPickedUp) continue;
+
+                var keyRect = new Rectangle(
+                    (int)key.Position.X,
+                    (int)key.Position.Y,
+                    GameDefaults.TileSize,
+                    GameDefaults.TileSize
+                );
+
+                if (playerRect.Intersects(keyRect))
+                {
+                    onKeyPickUp(key);
+                }
+            }
+        }
+        
+        public void CheckEnemyCollision()
+        {
+            
         }
 
         private void MovePlayer(float x, float y)

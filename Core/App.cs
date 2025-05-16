@@ -49,13 +49,37 @@ public class App : Microsoft.Xna.Framework.Game
         _level.LoadTileMap(_levelLoader);
         _level.LoadMapTextures();
         _level.LoadEnemies(Services);
+        _level.LoadKeys(Services);
         _player = new Player(_level.FindPlayerPosition(1), GameDefaults.PlayerHeathPoints,
             GameDefaults.PlayerAttackStrength, Services, _level);
     }
+    
+    private void LoadNextLevel()
+    {
+        Console.WriteLine("Загрузка следующего уровня...");
+        _level = new Level(Services);
+        _level.LoadTileMap(_levelLoader);
+        _level.LoadMapTextures();
+        _level.LoadEnemies(Services);
+        _level.LoadKeys(Services);
+        _player.ResetPositionToSpawn(_level.LevelSpawnPoint);
+        _player.UpdateLevelReference(_level);
+        SetupBufferSize();
+        _gameOver = false;
+        Console.WriteLine("Уровень загружен");
+    }
+
 
     protected override void Update(GameTime gameTime)
     {
         if (_gameOver) return;
+        if (_level.IsCompleted)
+        {
+            Console.WriteLine("Уровень пройден.");
+            _gameOver = true;
+            LoadNextLevel();
+            return;
+        }
         if (!_player.IsAlive)
         {
             Console.WriteLine("Игрок погиб. Игра окончена.");
@@ -68,7 +92,11 @@ public class App : Microsoft.Xna.Framework.Game
             Exit();
 
         _player.Update(gameTime);
+        _player.CheckKeyCollision(_level.PickUpKey, _level.Keys);
+        _player.CheckEnemyCollision();
         _level.Enemies.ForEach(enemy => enemy.Update(gameTime));
+        
+        
         
         if (Mouse.GetState().LeftButton == ButtonState.Pressed)
         {
@@ -107,6 +135,7 @@ public class App : Microsoft.Xna.Framework.Game
 
         _level.Draw(_spriteBatch);
         _level.DrawEnemies(_spriteBatch);
+        _level.DrawKeys(_spriteBatch);
         _player.Draw(_spriteBatch);
 
         _spriteBatch.End();

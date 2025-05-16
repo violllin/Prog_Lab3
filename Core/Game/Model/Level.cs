@@ -15,7 +15,12 @@ public class Level
     private readonly ContentManager _contentManager;
     private Microsoft.Xna.Framework.Vector2 _position;
 
+    public Vector2 LevelSpawnPoint;
+
     public List<Enemy> Enemies { get; private set; } = new List<Enemy>();
+    public List<Key> Keys { get; private set; } = new List<Key>();
+    public int PickedKeys { get; set; }
+    public bool IsCompleted => PickedKeys == Keys.Count;
 
     public TileMap TileMap { get; set; }
 
@@ -41,7 +46,7 @@ public class Level
     public Level(IServiceProvider serviceProvider)
     {
         _contentManager = new ContentManager(serviceProvider, "Content");
-        Initialize();
+        InitTileMap();
     }
 
     #region LoadRegion
@@ -49,6 +54,7 @@ public class Level
     public void LoadTileMap(ILevelLoader levelLoader)
     {
         TileMap = levelLoader.LoadRandomLevel();
+        LevelSpawnPoint = LoadSpawnPoint();
     }
 
     public void LoadMapTextures()
@@ -62,10 +68,19 @@ public class Level
         Console.WriteLine("Map textures loaded.");
     }
 
-    public void LoadEnemyTextures()
+    private Vector2 LoadSpawnPoint()
     {
-        //TexturesGw.Add(_textureManager.LoadEnemyTextures(_contentManager).Item1,
-        //    _textureManager.LoadEnemyTextures(_contentManager).Item2);
+        for (var y = 0; y < TileMap.Height; y++)
+        {
+            for (var x = 0; x < TileMap.Width; x++)
+            {
+                if (TileMap.Tiles[y][x] == (int) TileCollision.SpawnPoint)
+                {
+                    return new Vector2(x, y);
+                }
+            }
+        }
+        throw new NullReferenceException("Spawn point not found");
     }
 
     public void LoadEnemies(GameServiceContainer services)
@@ -84,16 +99,26 @@ public class Level
         }
     }
 
+    public void LoadKeys(GameServiceContainer services)
+    {
+        for (var y = 0; y < TileMap.Height; y++)
+        {
+            for (var x = 0; x < TileMap.Width; x++)
+            {
+                if (TileMap.Tiles[y][x] == (int)TileCollision.Key)
+                {
+                    var position = new Vector2(x, y) * GameDefaults.TileSize;
+                    Keys.Add(new Key(position, services));
+                }
+            }
+        }
+    }
+
     #endregion
 
     #region InitializeRegion
 
-    private void Initialize()
-    {
-        InitLevel();
-    }
-
-    private void InitLevel()
+    private void InitTileMap()
     {
         TileMap = new TileMap();
     }
@@ -111,7 +136,7 @@ public class Level
                 for (var x = 0; x < TileMap.Width; x++)
                 {
                     var tileKey = TileMap.Tiles[y][x];
-                    if (tileKey is 1 or 3) tileKey = 2;
+                    if (tileKey is 1 or 3 or 11) tileKey = 2;
 
                     if (!_texturesGw.TryGetValue(tileKey, out var texture))
                     {
@@ -119,18 +144,9 @@ public class Level
                         continue;
                     }
                     _position = new Microsoft.Xna.Framework.Vector2(x * GameDefaults.TileSize, y * GameDefaults.TileSize);
-
-                    // if (texture != null)
-                    //     spriteBatch.Draw(texture, _position, null, Color.White, 0f, Vector2.Zero, 1f,
-                    //         SpriteEffects.None, 0.8f);
-
                     spriteBatch.Draw(texture, _position, null, Color.White, 0f, Vector2.Zero, 1f,
                         SpriteEffects.None, 0.8f);
-                    //
-                    // if (!_texturesGw.TryGetValue(tileKey, out var tileTexture)) continue;
-                    // _position = new Microsoft.Xna.Framework.Vector2(x * tileTexture.Width, y * tileTexture.Height);
-                    // spriteBatch.Draw(tileTexture, _position, null, Color.White, 0f, Vector2.Zero, 1f,
-                    //     SpriteEffects.None, 0.8f);
+   
                 }
             }
         }
@@ -140,11 +156,25 @@ public class Level
         }
     }
 
+    public void PickUpKey(Key key)
+    {
+        key.PickUp();
+        PickedKeys++;
+    }
+
     public void DrawEnemies(SpriteBatch spriteBatch)
     {
         foreach (var enemy in Enemies)
         {
             enemy.Draw(spriteBatch);
+        }
+    }
+    
+    public void DrawKeys(SpriteBatch spriteBatch)
+    {
+        foreach (var key in Keys)
+        {
+            key.Draw(spriteBatch);
         }
     }
 
