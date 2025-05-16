@@ -83,6 +83,11 @@ public class Enemy : Entity, IAttacked, IAttacking
         {
             _isDamaged = (false, _isDamaged.Item2);
         }
+        
+        if (gameTime.TotalGameTime - _lastAttackingTime > _attackCooldown)
+        {
+            _isAttacking = false;
+        }
     }
     
     public void Hit(IAttacked target, GameTime gameTime)
@@ -110,7 +115,9 @@ public class Enemy : Entity, IAttacked, IAttacking
     }
 
     #endregion
-    
+
+    #region Render
+
     public void Draw(SpriteBatch spriteBatch)
     {
         if (_enemyTextures.Count == 0)
@@ -123,7 +130,23 @@ public class Enemy : Entity, IAttacked, IAttacking
         _enemyTextures.TryGetValue(5, out var enemyAttackingTexture);
         _enemyTextures.TryGetValue(6, out var enemyDiedTexture);
         _enemyTextures.TryGetValue(10, out var enemyDamagedTexture);
-        if (IsAlive && _isDamaged.Item1)
+        
+        if (!IsAlive)
+        {
+            spriteBatch.Draw(
+                enemyDiedTexture,
+                Position,
+                null,
+                Color.White,
+                0f,
+                Vector2.Zero,
+                1f,
+                SpriteEffects.None,
+                0.0f);
+            return;
+        }
+        
+        if (_isDamaged.Item1)
         {
             spriteBatch.Draw(
                 enemyDamagedTexture,
@@ -138,43 +161,35 @@ public class Enemy : Entity, IAttacked, IAttacking
             return;
         }
         
-        if (IsAlive && _isAttacking)
+        switch (_isAttacking)
         {
-            spriteBatch.Draw(
-                enemyAttackingTexture,
-                Position,
-                null,
-                Color.White,
-                0f,
-                Vector2.Zero,
-                1f,
-                SpriteEffects.None,
-                0.0f);
-        } else if (!_isAttacking)
-        {
-            spriteBatch.Draw(
-                enemyTexture,
-                Position,
-                null,
-                Color.White,
-                0f,
-                Vector2.Zero,
-                1f,
-                SpriteEffects.None,
-                0.0f);
-        }
-        else if (!IsAlive)
-        {
-            spriteBatch.Draw(
-                enemyDiedTexture,
-                Position,
-                null,
-                Color.White,
-                0f,
-                Vector2.Zero,
-                1f,
-                SpriteEffects.None,
-                0.0f);
+            case true:
+                spriteBatch.Draw(
+                    enemyAttackingTexture,
+                    Position,
+                    null,
+                    Color.White,
+                    0f,
+                    Vector2.Zero,
+                    1f,
+                    SpriteEffects.None,
+                    0.0f);
+                break;
+            case false:
+                spriteBatch.Draw(
+                    enemyTexture,
+                    Position,
+                    null,
+                    Color.White,
+                    0f,
+                    Vector2.Zero,
+                    1f,
+                    SpriteEffects.None,
+                    0.0f);
+                break;
         }
     }
+
+    #endregion
+    
 }
