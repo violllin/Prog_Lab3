@@ -34,26 +34,6 @@ public class MovementManager : IMovementManager
 
         return (x, y);
     }
-
-    private bool IsTileObstacle(int tileKey)
-    {
-        return tileKey == 1 || tileKey == 2;
-    }
-    
-    private bool IsTileKey(int tileKey)
-    {
-        return tileKey == 11;
-    }
-    
-    private bool IsTileEnemy(int tileKey)
-    {
-        return tileKey == 3;
-    }
-    
-    private bool IsTileHeart(int tileKey)
-    {
-        return tileKey == 12;
-    }
     
     public bool CheckCollision(Rectangle playerRect, TileMap tileMap)
     {
@@ -80,7 +60,30 @@ public class MovementManager : IMovementManager
                 }
             }
         }
-
         return false;
     }
+    
+    #region Tile verification
+
+    private bool IsTileObstacle(int tileKey)
+    {
+        return tileKey == 1 || tileKey == 2;
+    }
+    
+    private bool IsTileKey(int tileKey)
+    {
+        return tileKey == 11;
+    }
+    
+    private bool IsTileEnemy(int tileKey)
+    {
+        return tileKey == 3;
+    }
+    
+    private bool IsTileHeart(int tileKey)
+    {
+        return tileKey == 12;
+    }
+
+    #endregion
 }

@@ -48,6 +48,27 @@ public class Level
         InitTileMap();
     }
 
+    #region Handlers
+
+    public void OnEnemyDefeat()
+    {
+        EnemiesDefeated++;
+        Console.WriteLine($"{EnemiesDefeated}/{Enemies.Count} enemies defeated."); 
+    }
+
+    public void PickUpKey(Key key)
+    {
+        key.PickUp();
+        PickedKeys++;
+    }
+    
+    public void PickUpHearth(Hearth hearth)
+    {
+        hearth.PickUp();
+    }
+
+    #endregion
+
     #region LoadRegion
 
     public void LoadTileMap(ILevelLoader levelLoader)
@@ -71,7 +92,7 @@ public class Level
         {
             for (var x = 0; x < TileMap.Width; x++)
             {
-                if (TileMap.Tiles[y][x] == (int) TileCollision.SpawnPoint)
+                if (TileMap.Tiles[y][x] == (int) TileMatching.SpawnPoint)
                 {
                     return new Vector2(x, y);
                 }
@@ -86,7 +107,7 @@ public class Level
         {
             for (var x = 0; x < TileMap.Width; x++)
             {
-                if (TileMap.Tiles[y][x] == (int)TileCollision.Enemy)
+                if (TileMap.Tiles[y][x] == (int)TileMatching.Enemy)
                 {
                     var position = new Vector2(x, y) * GameDefaults.TileSize;
                     Enemies.Add(new Enemy(position, GameDefaults.EyeEnemyHealthPoints,
@@ -102,7 +123,7 @@ public class Level
         {
             for (var x = 0; x < TileMap.Width; x++)
             {
-                if (TileMap.Tiles[y][x] == (int)TileCollision.Key)
+                if (TileMap.Tiles[y][x] == (int)TileMatching.Key)
                 {
                     var position = new Vector2(x, y) * GameDefaults.TileSize;
                     Keys.Add(new Key(position, services));
@@ -117,7 +138,7 @@ public class Level
         {
             for (var x = 0; x < TileMap.Width; x++)
             {
-                if (TileMap.Tiles[y][x] == (int)TileCollision.Hearth)
+                if (TileMap.Tiles[y][x] == (int)TileMatching.Hearth)
                 {
                     var position = new Vector2(x, y) * GameDefaults.TileSize;
                     Hearths.Add(new Hearth(position, services));
@@ -166,23 +187,6 @@ public class Level
         {
             throw new ArgumentException("tileMap doesn't have a correct size");
         }
-    }
-    
-    public void OnEnemyDefeat()
-    {
-        EnemiesDefeated++;
-        Console.WriteLine($"{EnemiesDefeated}/{Enemies.Count} enemies defeated."); 
-    }
-
-    public void PickUpKey(Key key)
-    {
-        key.PickUp();
-        PickedKeys++;
-    }
-    
-    public void PickUpHearth(Hearth hearth)
-    {
-        hearth.PickUp();
     }
 
     public void DrawEnemies(SpriteBatch spriteBatch)

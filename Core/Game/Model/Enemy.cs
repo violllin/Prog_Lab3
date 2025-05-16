@@ -9,6 +9,8 @@ namespace Core.Game.Model;
 
 public class Enemy : Entity, IAttacked, IAttacking
 {
+    #region Callbacks region
+
     public event Action? OnEnemyDied;
     
     public void SubscribeToEnemyDefeat(Action action)
@@ -25,13 +27,15 @@ public class Enemy : Entity, IAttacked, IAttacking
             OnEnemyDied += action;
         }
     }
-    
+
+    #endregion
+
     private readonly ITextureManager _textureManager = new TextureManager();
     private readonly ContentManager _contentManager;
     private Dictionary<int, Texture2D> _enemyTextures = new();
     private Texture2D? _enemyAttackingTexture;
     private Texture2D? _enemyDiedTexture;
-
+    
     private double _attackStrength;
     private TimeSpan _lastAttackingTime;
     private TimeSpan _attackCooldown;
@@ -63,6 +67,8 @@ public class Enemy : Entity, IAttacked, IAttacking
     {
         _enemyTextures = _textureManager.LoadEnemyTextures(_contentManager);
     }
+
+    #region Damage region
 
     private bool IsInAttackRange(Vector2 targetPosition)
     {
@@ -103,6 +109,8 @@ public class Enemy : Entity, IAttacked, IAttacking
         OnEnemyDied = null;
     }
 
+    #endregion
+    
     public void Draw(SpriteBatch spriteBatch)
     {
         if (_enemyTextures.Count == 0)

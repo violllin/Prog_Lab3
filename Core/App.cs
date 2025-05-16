@@ -14,7 +14,7 @@ public class App : Microsoft.Xna.Framework.Game
     private SpriteBatch _spriteBatch;
     private Player _player;
     private Level _level;
-    private bool _gameOver = false;
+    private bool _gameOver;
 
     public App()
     {
@@ -22,59 +22,7 @@ public class App : Microsoft.Xna.Framework.Game
         Content.RootDirectory = "Content";
         IsMouseVisible = true;
     }
-
-    protected override void Initialize()
-    {
-        _graphics.SynchronizeWithVerticalRetrace = true;
-        _level = new Level(Services);
-        base.Initialize();
-    }
-
-    protected override void LoadContent()
-    {
-        _spriteBatch = new SpriteBatch(GraphicsDevice);
-        LoadLevel();
-        SetupBufferSize();
-    }
-
-    private void SetupBufferSize()
-    {
-        _graphics.PreferredBackBufferWidth = _level.TileMap.Width * GameDefaults.TileSize;
-        _graphics.PreferredBackBufferHeight = _level.TileMap.Height * GameDefaults.TileSize;
-        _graphics.ApplyChanges();
-    }
-
-    private void LoadLevel(bool isNewLevel = false)
-    {
-        if (isNewLevel)
-        {
-            _level = new Level(Services);
-        }
-        _level.LoadTileMap(_levelLoader);
-        _level.LoadMapTextures();
-        
-        _level.LoadEnemies(Services);
-        _level.LoadKeys(Services);
-        _level.LoadHearths(Services);
-
-        if (!isNewLevel)
-        {
-            _player = new Player(_level.FindPlayerPosition(1), GameDefaults.PlayerHeathPoints,
-                GameDefaults.PlayerAttackStrength, Services, _level);
-        }
-        
-        _player.ResetPositionToSpawn(_level.LevelSpawnPoint);
-        _player.UpdateLevelReference(_level);
-        SetupBufferSize();
-        _gameOver = false;
-        Console.WriteLine("Уровень загружен");
-    }
     
-    private void LoadNextLevel()
-    {
-        LoadLevel(true);
-    }
-
     protected override void Update(GameTime gameTime)
     {
         if (_gameOver) return;
@@ -137,6 +85,66 @@ public class App : Microsoft.Xna.Framework.Game
         base.Update(gameTime);
     }
 
+
+    #region Init
+
+    protected override void Initialize()
+    {
+        _graphics.SynchronizeWithVerticalRetrace = true;
+        _level = new Level(Services);
+        base.Initialize();
+    }
+
+    protected override void LoadContent()
+    {
+        _spriteBatch = new SpriteBatch(GraphicsDevice);
+        LoadLevel();
+        SetupBufferSize();
+    }
+
+    private void SetupBufferSize()
+    {
+        _graphics.PreferredBackBufferWidth = _level.TileMap.Width * GameDefaults.TileSize;
+        _graphics.PreferredBackBufferHeight = _level.TileMap.Height * GameDefaults.TileSize;
+        _graphics.ApplyChanges();
+    }
+
+    private void LoadLevel(bool isNewLevel = false)
+    {
+        if (isNewLevel)
+        {
+            _level = new Level(Services);
+        }
+        _level.LoadTileMap(_levelLoader);
+        _level.LoadMapTextures();
+        
+        _level.LoadEnemies(Services);
+        _level.LoadKeys(Services);
+        _level.LoadHearths(Services);
+
+        if (!isNewLevel)
+        {
+            _player = new Player(_level.FindPlayerPosition(1), GameDefaults.PlayerHeathPoints,
+                GameDefaults.PlayerAttackStrength, Services, _level);
+        }
+        
+        _player.ResetPositionToSpawn(_level.LevelSpawnPoint);
+        _player.UpdateLevelReference(_level);
+        SetupBufferSize();
+        _gameOver = false;
+        Console.WriteLine("Уровень загружен");
+    }
+    
+    private void LoadNextLevel()
+    {
+        LoadLevel(true);
+    }
+
+    #endregion
+
+
+    #region Render
+
     protected override void Draw(GameTime gameTime)
     {
         GraphicsDevice.Clear(Color.CornflowerBlue);
@@ -153,4 +161,6 @@ public class App : Microsoft.Xna.Framework.Game
         _spriteBatch.End();
         base.Draw(gameTime);
     }
+
+    #endregion
 }
