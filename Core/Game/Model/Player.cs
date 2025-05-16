@@ -26,7 +26,6 @@ namespace Core.Game.Model
         private TimeSpan _attackCooldown;
         private TimeSpan _damagedRenderCooldown;
 
-
         public Player(Vector2 position, double healthPoints, double attackStrength, IServiceProvider serviceProvider,
             Level level) : base(position, healthPoints)
         {
@@ -36,7 +35,7 @@ namespace Core.Game.Model
             _lastAttackingTime = TimeSpan.Zero;
             _isDamaged = (false, TimeSpan.Zero);
             _attackCooldown = new TimeSpan(0, 0, 0, 1);
-            _damagedRenderCooldown = new TimeSpan(0, 0, 2);
+            _damagedRenderCooldown = new TimeSpan(0, 0, 1);
             LoadPlayerTextures();
             Reset(position, healthPoints);
         }
@@ -62,7 +61,7 @@ namespace Core.Game.Model
                 MovePlayer(x, y);
             if (gameTime.TotalGameTime - _damagedTime.Item2 > _damagedRenderCooldown)
             {
-                _isDamaged = (false, TimeSpan.Zero);
+                _isDamaged = (false, _isDamaged.Item2);
             }
         }
 
@@ -112,51 +111,29 @@ namespace Core.Game.Model
             _playerTextures.TryGetValue(8, out var playerDiedTexture);
             _playerTextures.TryGetValue(9, out var playerDamagedTexture);
 
+            Texture2D? currentTexture = null;
+
             if (IsAlive && _isDamaged.Item1)
             {
-                spriteBatch.Draw(
-                    playerDamagedTexture,
-                    _position,
-                    null,
-                    Color.White,
-                    0f,
-                    Vector2.Zero,
-                    1f,
-                    SpriteEffects.None,
-                    0.0f);
-                return;
+                currentTexture = playerDamagedTexture;
             }
-            
-            if (IsAlive && !_isAttacking)
+            else if (IsAlive && !_isAttacking)
             {
-                spriteBatch.Draw(
-                    playerTexture,
-                    _position,
-                    null,
-                    Color.White,
-                    0f,
-                    Vector2.Zero,
-                    1f,
-                    SpriteEffects.None,
-                    0.0f);
+                currentTexture = playerTexture;
             }
             else if (IsAlive && _isAttacking)
             {
-                spriteBatch.Draw(
-                    playerAttackingTexture,
-                    _position,
-                    null,
-                    Color.White,
-                    0f,
-                    Vector2.Zero,
-                    1f,
-                    SpriteEffects.None,
-                    0.0f);
+                currentTexture = playerAttackingTexture;
             }
             else if (!IsAlive)
             {
+                currentTexture = playerDiedTexture;
+            }
+
+            if (currentTexture != null)
+            {
                 spriteBatch.Draw(
-                    playerDiedTexture,
+                    currentTexture,
                     _position,
                     null,
                     Color.White,
@@ -176,9 +153,9 @@ namespace Core.Game.Model
         public void TakeDamage(double damage, GameTime gameTime)
         {
             HealthPoints -= damage;
+            _isDamaged = (true, gameTime.TotalGameTime);
             Console.WriteLine(
                 $"Получен урон: {damage}ед., состояние здоровья: ({HealthPoints}/{GameDefaults.PlayerHeathPoints})");
-            _isDamaged = (true, gameTime.TotalGameTime);
         }
 
         public void Hit(IAttacked target, GameTime gameTime)

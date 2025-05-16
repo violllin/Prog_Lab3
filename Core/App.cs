@@ -14,6 +14,7 @@ public class App : Microsoft.Xna.Framework.Game
     private SpriteBatch _spriteBatch;
     private Player _player;
     private Level _level;
+    private bool _gameOver = false;
 
     public App()
     {
@@ -55,10 +56,12 @@ public class App : Microsoft.Xna.Framework.Game
 
     protected override void Update(GameTime gameTime)
     {
+        if (_gameOver) return;
         if (!_player.IsAlive)
         {
             Console.WriteLine("Игрок погиб. Игра окончена.");
-            Exit();
+            _gameOver = true;
+            return;
         }
         if (GamePad.GetState(PlayerIndex.One).Buttons.Back == ButtonState.Pressed ||
             Keyboard.GetState().IsKeyDown(Keys.Escape))
@@ -101,7 +104,7 @@ public class App : Microsoft.Xna.Framework.Game
 
         _level.Draw(_spriteBatch);
         _level.DrawEnemies(_spriteBatch);
-        if (_player.IsAlive) _player.Draw(_spriteBatch);
+        _player.Draw(_spriteBatch);
 
         _spriteBatch.End();
         base.Draw(gameTime);
