@@ -9,5 +9,6 @@ public static class GameDefaults
     public const int PlayerAttackRange = 50;
     public const double EyeEnemyHealthPoints = 40.0;
     public const int EyeEnemyAttackRange = 45;
-    public const double EyeEnemyAttackStrength = 5.0;
+    public const double EyeEnemyAttackStrength = 4.5;
+    public const double HearthHealthPoints = 25.0;
 }

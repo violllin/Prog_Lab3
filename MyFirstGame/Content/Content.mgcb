@@ -32,6 +32,9 @@
 /build:resGW/playerDamaged.png
 /build:resGW/playerDied.png
 
+/build:resGW/key.png
+/build:resGW/hearth.png
+
 
 #begin resGW/enemyV1.png
 /importer:TextureImporter

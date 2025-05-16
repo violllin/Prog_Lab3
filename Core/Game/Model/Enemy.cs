@@ -9,6 +9,23 @@ namespace Core.Game.Model;
 
 public class Enemy : Entity, IAttacked, IAttacking
 {
+    public event Action? OnEnemyDied;
+    
+    public void SubscribeToEnemyDefeat(Action action)
+    {
+        if (OnEnemyDied != null)
+        {
+            if (!OnEnemyDied.GetInvocationList().Contains(action))
+            {
+                OnEnemyDied += action;
+            }
+        }
+        else
+        {
+            OnEnemyDied += action;
+        }
+    }
+    
     private readonly ITextureManager _textureManager = new TextureManager();
     private readonly ContentManager _contentManager;
     private Dictionary<int, Texture2D> _enemyTextures = new();
@@ -40,7 +57,6 @@ public class Enemy : Entity, IAttacked, IAttacking
     {
         Position = position;
         HealthPoints = healthPoints;
-        Console.WriteLine($"Enemy position initialized to: {Position}");
     }
 
     private void LoadEnemyTextures()
@@ -69,7 +85,6 @@ public class Enemy : Entity, IAttacked, IAttacking
         {
             if (IsInAttackRange(entity.Position))
             {
-                string asd = _isAttacking ? "attack" : "no attack";
                 _isAttacking = true;
                 _lastAttackingTime = DelayedAttack.DelayedHit(target, gameTime, _lastAttackingTime, _attackCooldown,
                                          _attackStrength) ??
@@ -83,7 +98,9 @@ public class Enemy : Entity, IAttacked, IAttacking
         HealthPoints -= damage;
         _isDamaged = (true, gameTime.TotalGameTime);
         Console.WriteLine(
-            $"Вы нанесли {damage}ед. урона врагу, состояние здоровья: ({HealthPoints}/{GameDefaults.EyeEnemyHealthPoints})");
+            $"Вы нанесли {damage}ед. урона врагу, состояние здоровья врага: ({HealthPoints}/{GameDefaults.EyeEnemyHealthPoints})");
+        if (!IsAlive) OnEnemyDied?.Invoke();
+        OnEnemyDied = null;
     }
 
     public void Draw(SpriteBatch spriteBatch)

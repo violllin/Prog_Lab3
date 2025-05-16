@@ -38,15 +38,24 @@ namespace Core.Game.Model
             _attackCooldown = new TimeSpan(0, 0, 0, 1);
             _damagedRenderCooldown = new TimeSpan(0, 0, 0,0, 250);
             LoadPlayerTextures();
-            Reset(position, healthPoints);
+            Reset(position * GameDefaults.TileSize, healthPoints);
         }
 
         private void Reset(Vector2 position, double healthPoints)
         {
-            Position = position * GameDefaults.TileSize;
+            Position = position;
             _position = Position;
             HealthPoints = healthPoints;
-            Console.WriteLine($"Player position initialized to: {_position}");
+        }
+        
+        public void ResetPositionToSpawn(Vector2 spawnPosition)
+        {
+            Reset(spawnPosition * GameDefaults.TileSize, HealthPoints);
+        }
+        
+        public void UpdateLevelReference(Level newLevel)
+        {
+            _level = newLevel;
         }
 
         private void LoadPlayerTextures()
@@ -65,13 +74,69 @@ namespace Core.Game.Model
                 _isDamaged = (false, _isDamaged.Item2);
             }
         }
+        
+        private void CheckKeyCollision(Action<Key> onKeyPickUp, List<Key> keys)
+        {
+            var playerRect = new Rectangle(
+                (int)_position.X,
+                (int)_position.Y,
+                _playerTextures.First().Value.Width,
+                _playerTextures.First().Value.Height
+            );
+
+            foreach (var key in keys)
+            {
+                if (key.IsPickedUp) continue;
+
+                var keyRect = new Rectangle(
+                    (int)key.Position.X,
+                    (int)key.Position.Y,
+                    GameDefaults.TileSize,
+                    GameDefaults.TileSize
+                );
+
+                if (playerRect.Intersects(keyRect))
+                {
+                    onKeyPickUp(key);
+                }
+            }
+        }
+        
+        private void CheckHearthCollision(Action<Hearth> onHearthPickUp, List<Hearth> hearths)
+        {
+            var playerRect = new Rectangle(
+                (int)_position.X,
+                (int)_position.Y,
+                _playerTextures.First().Value.Width,
+                _playerTextures.First().Value.Height
+            );
+
+            foreach (var hearth in hearths)
+            {
+                if (hearth.IsPickedUp) continue;
+
+                var keyRect = new Rectangle(
+                    (int)hearth.Position.X,
+                    (int)hearth.Position.Y,
+                    GameDefaults.TileSize,
+                    GameDefaults.TileSize
+                );
+
+                if (playerRect.Intersects(keyRect))
+                {
+                    onHearthPickUp(hearth);
+                    HealthPoints += GameDefaults.HearthHealthPoints;
+                    Console.WriteLine($"Вы подобрали сердечко. Здоровье увеличено на {GameDefaults.HearthHealthPoints}. Состояние здоровья: ({HealthPoints}/{GameDefaults.PlayerHeathPoints})");
+                }
+            }
+        }
 
         private void MovePlayer(float x, float y)
         {
             if (_playerTextures.Count == 0) return;
 
             var movement = new Vector2(x, y) * GameDefaults.PlayerMovementSpeed;
-
+            
             var horizontalRect = new Rectangle(
                 (int)(_position.X + movement.X),
                 (int)_position.Y,
@@ -79,7 +144,11 @@ namespace Core.Game.Model
                 _playerTextures.First().Value.Height
             );
 
-            if (!_movementManager.CheckCollision(horizontalRect, _level.TileMap))
+            CheckKeyCollision(_level.PickUpKey, _level.Keys);
+            CheckHearthCollision(_level.PickUpHearth, _level.Hearths);
+            
+            if (!_movementManager.CheckCollision(horizontalRect, _level.TileMap) &&
+                !WillCollideWithEnemy(horizontalRect, _level.Enemies))
             {
                 _position.X += movement.X;
             }
@@ -91,12 +160,36 @@ namespace Core.Game.Model
                 _playerTextures.First().Value.Height
             );
 
-            if (!_movementManager.CheckCollision(verticalRect, _level.TileMap))
+            if (!_movementManager.CheckCollision(verticalRect, _level.TileMap) &&
+                !WillCollideWithEnemy(verticalRect, _level.Enemies))
             {
                 _position.Y += movement.Y;
             }
 
             Position = _position;
+        }
+
+        private bool WillCollideWithEnemy(Rectangle futureRect, List<Enemy> enemies)
+        {
+            foreach (var enemy in enemies)
+            {
+                if (enemy.IsAlive)
+                {
+                    var enemyRect = new Rectangle(
+                        (int)enemy.Position.X,
+                        (int)enemy.Position.Y,
+                        GameDefaults.TileSize,
+                        GameDefaults.TileSize
+                    );
+
+                    if (futureRect.Intersects(enemyRect))
+                    {
+                        return true;
+                    }
+                }
+            }
+
+            return false;
         }
 
         public void Draw(SpriteBatch spriteBatch)

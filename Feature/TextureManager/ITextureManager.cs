@@ -8,4 +8,6 @@ public interface ITextureManager
     Dictionary<int, Texture2D> LoadMapTextures(ContentManager contentManager);
     Dictionary<int, Texture2D> LoadEnemyTextures(ContentManager contentManager);
     Dictionary<int, Texture2D> LoadPlayerTextures(ContentManager contentManager);
+    Dictionary<int, Texture2D> LoadKeyTextures(ContentManager contentManager);
+    Dictionary<int, Texture2D> LoadHearthTextures(ContentManager contentManager);
 }

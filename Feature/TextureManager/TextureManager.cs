@@ -36,4 +36,20 @@ public class TextureManager : ITextureManager
             { 9, contentManager.Load<Texture2D>("resGW/playerDamaged") },
         };
     }
+
+    public Dictionary<int, Texture2D> LoadKeyTextures(ContentManager contentManager)
+    {
+        return new Dictionary<int, Texture2D>
+        {
+            { 11, contentManager.Load<Texture2D>("resGW/key") }
+        };
+    }
+
+    public Dictionary<int, Texture2D> LoadHearthTextures(ContentManager contentManager)
+    {
+        return new Dictionary<int, Texture2D>
+        {
+            { 12, contentManager.Load<Texture2D>("resGW/hearth") }
+        };
+    }
 }
