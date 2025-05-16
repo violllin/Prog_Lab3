@@ -92,8 +92,6 @@ public class App : Microsoft.Xna.Framework.Game
             Exit();
 
         _player.Update(gameTime);
-        _player.CheckKeyCollision(_level.PickUpKey, _level.Keys);
-        _player.CheckEnemyCollision();
         _level.Enemies.ForEach(enemy => enemy.Update(gameTime));
         
         

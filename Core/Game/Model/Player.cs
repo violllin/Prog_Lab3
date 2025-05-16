@@ -76,7 +76,7 @@ namespace Core.Game.Model
             }
         }
         
-        public void CheckKeyCollision(Action<Key> onKeyPickUp, List<Key> keys)
+        private void CheckKeyCollision(Action<Key> onKeyPickUp, List<Key> keys)
         {
             var playerRect = new Rectangle(
                 (int)_position.X,
@@ -102,18 +102,13 @@ namespace Core.Game.Model
                 }
             }
         }
-        
-        public void CheckEnemyCollision()
-        {
-            
-        }
 
         private void MovePlayer(float x, float y)
         {
             if (_playerTextures.Count == 0) return;
 
             var movement = new Vector2(x, y) * GameDefaults.PlayerMovementSpeed;
-
+            
             var horizontalRect = new Rectangle(
                 (int)(_position.X + movement.X),
                 (int)_position.Y,
@@ -121,7 +116,10 @@ namespace Core.Game.Model
                 _playerTextures.First().Value.Height
             );
 
-            if (!_movementManager.CheckCollision(horizontalRect, _level.TileMap))
+            CheckKeyCollision(_level.PickUpKey, _level.Keys);
+            
+            if (!_movementManager.CheckCollision(horizontalRect, _level.TileMap) &&
+                !WillCollideWithEnemy(horizontalRect, _level.Enemies))
             {
                 _position.X += movement.X;
             }
@@ -133,12 +131,36 @@ namespace Core.Game.Model
                 _playerTextures.First().Value.Height
             );
 
-            if (!_movementManager.CheckCollision(verticalRect, _level.TileMap))
+            if (!_movementManager.CheckCollision(verticalRect, _level.TileMap) &&
+                !WillCollideWithEnemy(verticalRect, _level.Enemies))
             {
                 _position.Y += movement.Y;
             }
 
             Position = _position;
+        }
+
+        private bool WillCollideWithEnemy(Rectangle futureRect, List<Enemy> enemies)
+        {
+            foreach (var enemy in enemies)
+            {
+                if (enemy.IsAlive)
+                {
+                    var enemyRect = new Rectangle(
+                        (int)enemy.Position.X,
+                        (int)enemy.Position.Y,
+                        GameDefaults.TileSize,
+                        GameDefaults.TileSize
+                    );
+
+                    if (futureRect.Intersects(enemyRect))
+                    {
+                        return true;
+                    }
+                }
+            }
+
+            return false;
         }
 
         public void Draw(SpriteBatch spriteBatch)
