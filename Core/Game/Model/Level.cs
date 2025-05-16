@@ -53,7 +53,6 @@ public class Level
     public void OnEnemyDefeat()
     {
         EnemiesDefeated++;
-        Console.WriteLine($"{EnemiesDefeated}/{Enemies.Count} enemies defeated."); 
     }
 
     public void PickUpKey(Key key)
