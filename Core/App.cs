@@ -1,7 +1,7 @@
 ﻿using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
-using Core.Game.Entity;
+using Core.Game.Model;
 using Feature;
 using Feature.LevelLoader;
 
@@ -47,16 +47,33 @@ public class App : Microsoft.Xna.Framework.Game
     {
         _level.LoadTileMap(_levelLoader);
         _level.LoadMapTextures();
-        _level.LoadEnemyTexture();
-        _player = new Player(_level.FindPlayerPosition(1), Services, _level);
+        _level.LoadEnemyTextures();
+        _level.LoadEnemies(Services);
+        _player = new Player(_level.FindPlayerPosition(1), GameDefaults.PlayerHeathPoints,
+            GameDefaults.PlayerAttackStrength, Services, _level);
     }
 
     protected override void Update(GameTime gameTime)
     {
-        if (GamePad.GetState(PlayerIndex.One).Buttons.Back == ButtonState.Pressed || Keyboard.GetState().IsKeyDown(Keys.Escape))
+        if (!_player.IsAlive)
+        {
+            Console.WriteLine("Игрок погиб. Игра окончена.");
+            Exit();
+        }
+        if (GamePad.GetState(PlayerIndex.One).Buttons.Back == ButtonState.Pressed ||
+            Keyboard.GetState().IsKeyDown(Keys.Escape))
             Exit();
 
         _player.Update(gameTime);
+
+        foreach (var enemy in _level.Enemies)
+        {
+            if (enemy.IsAlive)
+            { 
+                enemy.Hit(_player, gameTime);
+            }
+        }
+
         base.Update(gameTime);
     }
 
@@ -66,7 +83,7 @@ public class App : Microsoft.Xna.Framework.Game
         _spriteBatch.Begin(SpriteSortMode.BackToFront, BlendState.AlphaBlend);
 
         _level.Draw(_spriteBatch);
-        _player.Draw(_spriteBatch);
+        if (_player.IsAlive) _player.Draw(_spriteBatch);
 
         _spriteBatch.End();
         base.Draw(gameTime);
