@@ -48,7 +48,6 @@ public class App : Microsoft.Xna.Framework.Game
     {
         _level.LoadTileMap(_levelLoader);
         _level.LoadMapTextures();
-        // _level.LoadEnemyTextures();
         _level.LoadEnemies(Services);
         _player = new Player(_level.FindPlayerPosition(1), GameDefaults.PlayerHeathPoints,
             GameDefaults.PlayerAttackStrength, Services, _level);
@@ -63,33 +62,37 @@ public class App : Microsoft.Xna.Framework.Game
             _gameOver = true;
             return;
         }
+
         if (GamePad.GetState(PlayerIndex.One).Buttons.Back == ButtonState.Pressed ||
             Keyboard.GetState().IsKeyDown(Keys.Escape))
             Exit();
 
         _player.Update(gameTime);
+        _level.Enemies.ForEach(enemy => enemy.Update(gameTime));
+        
+        if (Mouse.GetState().LeftButton == ButtonState.Pressed)
+        {
+            _player.SetAttacking(true);
+            foreach (Enemy enemy in _level.Enemies)
+            {
+                {
+                    if (_player.IsAlive && enemy.IsAlive)
+                    {
+                        _player.Hit(enemy, gameTime);
+                    }
+                }
+            }
+        } 
+        else if (Mouse.GetState().LeftButton == ButtonState.Released)
+        {
+            _player.SetAttacking(false);
+        }
+
 
         foreach (var enemy in _level.Enemies)
         {
-            if (Mouse.GetState().LeftButton == ButtonState.Pressed)
-            {
-                _player.SetAttacking(true);
-                if (_player.IsAlive && enemy.IsAlive)
-                {
-                    _player.Hit(enemy, gameTime);
-                }
-            }
-            else if (Mouse.GetState().LeftButton == ButtonState.Released)
-            {
-                _player.SetAttacking(false);
-            }
-            
-        }
-        
-        foreach (var enemy in _level.Enemies)
-        {
             if (enemy.IsAlive)
-            { 
+            {
                 enemy.Hit(_player, gameTime);
             }
         }

@@ -20,10 +20,10 @@ namespace Core.Game.Model
         private Vector2 _position;
         private double _attackStrength;
         private TimeSpan _lastAttackingTime;
-        private bool _isAttacking = false;
-        private (bool, TimeSpan) _isDamaged, _damagedTime;
-        
+        private bool _isAttacking;
         private TimeSpan _attackCooldown;
+        
+        private (bool, TimeSpan) _isDamaged;
         private TimeSpan _damagedRenderCooldown;
 
         public Player(Vector2 position, double healthPoints, double attackStrength, IServiceProvider serviceProvider,
@@ -34,8 +34,9 @@ namespace Core.Game.Model
             _attackStrength = attackStrength;
             _lastAttackingTime = TimeSpan.Zero;
             _isDamaged = (false, TimeSpan.Zero);
+            _isAttacking = false;
             _attackCooldown = new TimeSpan(0, 0, 0, 1);
-            _damagedRenderCooldown = new TimeSpan(0, 0, 1);
+            _damagedRenderCooldown = new TimeSpan(0, 0, 0,0, 250);
             LoadPlayerTextures();
             Reset(position, healthPoints);
         }
@@ -59,7 +60,8 @@ namespace Core.Game.Model
             var (x, y) = _movementManager.HandleMovement();
             if (IsAlive)
                 MovePlayer(x, y);
-            if (gameTime.TotalGameTime - _damagedTime.Item2 > _damagedRenderCooldown)
+            Console.WriteLine(_isAttacking);
+            if (gameTime.TotalGameTime - _isDamaged.Item2 > _damagedRenderCooldown)
             {
                 _isDamaged = (false, _isDamaged.Item2);
             }
@@ -169,10 +171,6 @@ namespace Core.Game.Model
                             _attackStrength) ??
                         _lastAttackingTime;
                     _isAttacking = true;
-                }
-                else
-                {
-                    _isAttacking = false;
                 }
             }
         }

@@ -21,7 +21,8 @@ public class TextureManager : ITextureManager
         {
             { 3, contentManager.Load<Texture2D>("resGW/enemyV1") },
             { 5, contentManager.Load<Texture2D>("resGW/eyeEnemyAttacking") },
-            { 6, contentManager.Load<Texture2D>("resGW/eyeEnemyDied") }
+            { 6, contentManager.Load<Texture2D>("resGW/eyeEnemyDied") },
+            { 10, contentManager.Load<Texture2D>("resGW/eyeEnemyDamaged") },
         };
     }
 

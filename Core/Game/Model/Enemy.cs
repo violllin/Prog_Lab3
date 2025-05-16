@@ -19,6 +19,9 @@ public class Enemy : Entity, IAttacked, IAttacking
     private TimeSpan _lastAttackingTime;
     private TimeSpan _attackCooldown;
     private bool _isAttacking = false;
+    
+    private (bool, TimeSpan) _isDamaged;
+    private TimeSpan _damagedRenderCooldown;
 
     public Enemy(Vector2 position, double healthPoints, double attackStrength, IServiceProvider serviceProvider)
         : base(position, healthPoints)
@@ -26,7 +29,9 @@ public class Enemy : Entity, IAttacked, IAttacking
         _contentManager = new ContentManager(serviceProvider, "Content");
         _attackStrength = attackStrength;
         _lastAttackingTime = TimeSpan.Zero;
-        _attackCooldown = new TimeSpan(0, 0, 1);
+        _isDamaged = (false, TimeSpan.Zero);
+        _attackCooldown = new TimeSpan(0, 0, 0, 1);
+        _damagedRenderCooldown = new TimeSpan(0, 0, 0,0,250);
         LoadEnemyTextures();
         Reset(position, healthPoints);
     }
@@ -49,20 +54,26 @@ public class Enemy : Entity, IAttacked, IAttacking
         return distance <= GameDefaults.EyeEnemyAttackRange;
     }
 
+    public void Update(GameTime gameTime)
+    {
+        if (!IsAlive) return;
+        if (gameTime.TotalGameTime - _isDamaged.Item2 > _damagedRenderCooldown)
+        {
+            _isDamaged = (false, _isDamaged.Item2);
+        }
+    }
+    
     public void Hit(IAttacked target, GameTime gameTime)
     {
         if (target is Player entity)
         {
             if (IsInAttackRange(entity.Position))
             {
+                string asd = _isAttacking ? "attack" : "no attack";
                 _isAttacking = true;
                 _lastAttackingTime = DelayedAttack.DelayedHit(target, gameTime, _lastAttackingTime, _attackCooldown,
                                          _attackStrength) ??
                                      _lastAttackingTime;
-            }
-            else
-            {
-                _isAttacking = false;
             }
         }
     }
@@ -70,6 +81,7 @@ public class Enemy : Entity, IAttacked, IAttacking
     public void TakeDamage(double damage, GameTime gameTime)
     {
         HealthPoints -= damage;
+        _isDamaged = (true, gameTime.TotalGameTime);
         Console.WriteLine(
             $"Вы нанесли {damage}ед. урона врагу, состояние здоровья: ({HealthPoints}/{GameDefaults.EyeEnemyHealthPoints})");
     }
@@ -85,6 +97,22 @@ public class Enemy : Entity, IAttacked, IAttacking
         _enemyTextures.TryGetValue(3, out var enemyTexture);
         _enemyTextures.TryGetValue(5, out var enemyAttackingTexture);
         _enemyTextures.TryGetValue(6, out var enemyDiedTexture);
+        _enemyTextures.TryGetValue(10, out var enemyDamagedTexture);
+        if (IsAlive && _isDamaged.Item1)
+        {
+            spriteBatch.Draw(
+                enemyDamagedTexture,
+                Position,
+                null,
+                Color.White,
+                0f,
+                Vector2.Zero,
+                1f,
+                SpriteEffects.None,
+                0.0f);
+            return;
+        }
+        
         if (IsAlive && _isAttacking)
         {
             spriteBatch.Draw(
@@ -110,7 +138,7 @@ public class Enemy : Entity, IAttacked, IAttacking
                 SpriteEffects.None,
                 0.0f);
         }
-        else
+        else if (!IsAlive)
         {
             spriteBatch.Draw(
                 enemyDiedTexture,
